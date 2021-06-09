@@ -13,12 +13,13 @@
     <string name="facebook_app_id">4508518975843277</string>
     <string name="fb_login_protocol_scheme">fb4508518975843277</string>
 
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Tittle-Tattle</string>
     <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_home">MainActivity</string>
+    <string name="title_activity_home">Home</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="main_app_name">tittle-tattle</string>
+    <string name="img_login_content_desc">Login image</string>
 
 </resources>

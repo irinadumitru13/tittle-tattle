@@ -1,14 +1,5 @@
 <resources>
     <string name="app_name">Tittle-Tattle</string>
-    <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
-    <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
 
     <string name="facebook_app_id">4508518975843277</string>
     <string name="fb_login_protocol_scheme">fb4508518975843277</string>
@@ -21,5 +12,185 @@
     <string name="title_notifications">Notifications</string>
     <string name="main_app_name">tittle-tattle</string>
     <string name="img_login_content_desc">Login image</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="my_interests">My subscriptions</string>
+    <string name="home_img_content_desc">Home page image</string>
+    <string name="welcome_back">Welcome back,</string>
+
+    <string-array name="categories">
+        <item>Area of activity</item>
+        <item>Arts &amp; Entertainment</item>
+        <item>Education</item>
+        <item>Real estates</item>
+        <item>Drinks</item>
+        <item>Food</item>
+        <item>Shopping</item>
+        <item>Sports</item>
+        <item>Others</item>
+    </string-array>
+
+    <string-array name="area_of_activity">
+        <item>Arts</item>
+        <item>Architecture</item>
+        <item>Archeology</item>
+        <item>Biology</item>
+        <item>Business</item>
+        <item>Chemistry</item>
+        <item>Computer Science</item>
+        <item>Economics</item>
+        <item>Electrical engineering</item>
+        <item>Finance &amp; banks</item>
+        <item>Film</item>
+        <item>Foreign languages</item>
+        <item>Geography</item>
+        <item>History</item>
+        <item>Law</item>
+        <item>Language &amp; literature</item>
+        <item>Management</item>
+        <item>Mathematics</item>
+        <item>Medicine</item>
+        <item>Music</item>
+        <item>Pharmacology</item>
+        <item>Philosophy</item>
+        <item>Physics</item>
+        <item>Politics</item>
+        <item>Political relations</item>
+        <item>Psychology</item>
+        <item>Religion</item>
+        <item>Sociology</item>
+        <item>Theatre &amp; cinema</item>
+        <item>Writing</item>
+    </string-array>
+
+    <string-array name="arts_entertainment">
+        <item>Arcade</item>
+        <item>Art gallery</item>
+        <item>Cinema</item>
+        <item>Comedy club</item>
+        <item>Concerts</item>
+        <item>Dance club &amp; nightclub</item>
+        <item>Festivals</item>
+        <item>Jazz &amp; blues club</item>
+        <item>Museum</item>
+        <item>Opera house</item>
+        <item>Racing track</item>
+        <item>Theatre</item>
+        <item>Theme park</item>
+        <item>Zoo</item>
+    </string-array>
+
+    <string-array name="drinks">
+        <item>Beer garden</item>
+        <item>Brewery</item>
+        <item>Coffee shop</item>
+        <item>Lounge</item>
+        <item>Pub</item>
+        <item>Smoothies &amp; juice bar</item>
+        <item>Tea room</item>
+        <item>Wine bar</item>
+        <item>Winery</item>
+    </string-array>
+
+    <string-array name="education">
+        <item>Conferences</item>
+        <item>Courses</item>
+        <item>High school</item>
+        <item>Kindergarten</item>
+        <item>Personal development</item>
+        <item>Primary school</item>
+        <item>Tutoring</item>
+        <item>University</item>
+    </string-array>
+
+    <string-array name="estates">
+        <item>Campsite</item>
+        <item>Caravan park</item>
+        <item>Flats</item>
+        <item>Hostel</item>
+        <item>Hotel</item>
+        <item>Houses</item>
+        <item>Lodge</item>
+        <item>Rent</item>
+    </string-array>
+
+    <string-array name="food">
+        <item>Bakery</item>
+        <item>Brunch restaurant</item>
+        <item>Cheese shop</item>
+        <item>Chinese restaurant</item>
+        <item>Dessert shop</item>
+        <item>Farmer\'s market</item>
+        <item>Fast food restaurant</item>
+        <item>Gelato</item>
+        <item>Indian restaurant</item>
+        <item>Italian restaurant</item>
+        <item>Lebanese restaurant</item>
+        <item>Restaurant</item>
+        <item>Sandwich shop</item>
+        <item>Spanish restaurant</item>
+        <item>Traditional restaurant</item>
+    </string-array>
+
+    <string-array name="others">
+        <item>Announcements</item>
+        <item>Warnings</item>
+        <item>Traffic</item>
+    </string-array>
+
+    <string-array name="shopping">
+        <item>Antiques shop</item>
+        <item>Apparel &amp; clothing</item>
+        <item>Beauty shop</item>
+        <item>Book shop</item>
+        <item>Boutique shop</item>
+        <item>Electronics shop</item>
+        <item>Film &amp; music shop</item>
+        <item>Flea market</item>
+        <item>Gift shop</item>
+        <item>Home &amp; garden shop</item>
+        <item>Newsagent</item>
+        <item>Pawn shop</item>
+        <item>Pet shop</item>
+        <item>Second hand shop</item>
+        <item>Shopping centre</item>
+        <item>Souvenir shop</item>
+        <item>Sporting goods shop</item>
+        <item>Superstore</item>
+        <item>Tobacco shop</item>
+    </string-array>
+
+    <string-array name="sports">
+        <item>Baseball</item>
+        <item>Basketball</item>
+        <item>Bowling</item>
+        <item>Boxing</item>
+        <item>Dancing</item>
+        <item>Fitness</item>
+        <item>Football</item>
+        <item>Gymnastics</item>
+        <item>Golf</item>
+        <item>Handball</item>
+        <item>Hockey</item>
+        <item>Ice skating</item>
+        <item>Karting</item>
+        <item>Paintball</item>
+        <item>Rafting/ kayaking</item>
+        <item>Rugby</item>
+        <item>Ski</item>
+        <item>Squash</item>
+        <item>Swimming</item>
+        <item>Tennis</item>
+        <item>Yoga</item>
+        <item>Philosophy</item>
+        <item>Physics</item>
+        <item>Politics</item>
+        <item>Political relations</item>
+        <item>Psychology</item>
+        <item>Religion</item>
+        <item>Sociology</item>
+        <item>Theatre &amp; cinema</item>
+        <item>Writing</item>
+    </string-array>
 
 </resources>

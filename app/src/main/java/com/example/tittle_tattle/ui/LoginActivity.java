@@ -10,6 +10,7 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.ui.homeScreen.HomeActivity;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -57,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
                 editor.putString("access_token", serialized_token);
                 editor.apply();
 
-                Intent intent = new Intent(getBaseContext(), Home.class);
+                Intent intent = new Intent(getBaseContext(), HomeActivity.class);
                 intent.putExtra("access_token", serialized_token);
                 startActivity(intent);
             }

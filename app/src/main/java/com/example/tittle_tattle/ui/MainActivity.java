@@ -10,6 +10,7 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.ui.homeScreen.HomeActivity;
 import com.facebook.AccessToken;
 import com.google.gson.Gson;
 
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                     || new Gson().fromJson(serialized_token, AccessToken.class).isExpired()) {
                 intent = new Intent(getBaseContext(), LoginActivity.class);
             } else {
-                intent = new Intent(getBaseContext(), Home.class);
+                intent = new Intent(getBaseContext(), HomeActivity.class);
                 intent.putExtra("access_token", serialized_token);
             }
 

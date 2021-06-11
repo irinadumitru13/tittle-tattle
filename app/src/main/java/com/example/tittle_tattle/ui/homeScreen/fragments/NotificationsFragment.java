@@ -1,4 +1,4 @@
-package com.example.tittle_tattle.ui.homeScreen.home;
+package com.example.tittle_tattle.ui.homeScreen.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,23 +12,24 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.tittle_tattle.databinding.FragmentHomeBinding;
+import com.example.tittle_tattle.databinding.FragmentNotificationsBinding;
+import com.example.tittle_tattle.ui.homeScreen.SharedViewModel;
 
-public class HomeFragment extends Fragment {
+public class NotificationsFragment extends Fragment {
 
-    private HomeViewModel homeViewModel;
-    private FragmentHomeBinding binding;
+    private SharedViewModel sharedViewModel;
+    private FragmentNotificationsBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+        sharedViewModel =
+                new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        binding = FragmentHomeBinding.inflate(inflater, container, false);
+        binding = FragmentNotificationsBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textHome;
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        final TextView textView = binding.textNotifications;
+        sharedViewModel.getNotificationText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

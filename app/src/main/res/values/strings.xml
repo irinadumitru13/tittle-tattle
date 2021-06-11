@@ -4,19 +4,20 @@
     <string name="facebook_app_id">4508518975843277</string>
     <string name="fb_login_protocol_scheme">fb4508518975843277</string>
 
-    <string name="title_activity_main">Tittle-Tattle</string>
+<!--    <string name="title_activity_main">Tittle-Tattle</string>-->
     <string name="title_activity_login">LoginActivity</string>
-    <string name="title_activity_home">Home</string>
+<!--    <string name="title_activity_home">Home</string>-->
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="main_app_name">tittle-tattle</string>
     <string name="img_login_content_desc">Login image</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+<!--    <string name="dummy_button">Dummy Button</string>-->
+<!--    <string name="dummy_content">DUMMY\nCONTENT</string>-->
     <string name="my_interests">My subscriptions</string>
-    <string name="home_img_content_desc">Home page image</string>
+    <string name="home_img_content_desc">Home image</string>
     <string name="welcome_back">Welcome back,</string>
+    <string name="main_activity_image">Main image</string>
 
     <string-array name="categories">
         <item>Area of activity</item>

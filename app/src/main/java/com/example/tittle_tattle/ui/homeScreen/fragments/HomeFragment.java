@@ -2,6 +2,7 @@ package com.example.tittle_tattle.ui.homeScreen.fragments;
 
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +35,7 @@ public class HomeFragment extends Fragment {
 
         final TextView textView = binding.nameText;
         sharedViewModel.getFullName().observe(getViewLifecycleOwner(), textView::setText);
+        
         return root;
     }
 
@@ -45,13 +47,14 @@ public class HomeFragment extends Fragment {
         my_subs_btn.setPaintFlags(my_subs_btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
         my_subs_btn.setOnClickListener(v -> {
-//            SubscriptionsFragment subscriptionsFragment = new SubscriptionsFragment();
-//
-//            requireActivity().getSupportFragmentManager().beginTransaction()
-//                    .replace(R.id.nav_host_fragment_container, subscriptionsFragment, "subscriptions")
-//                    .addToBackStack(null)
-//                    .commit();
             Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_subscriptions);
+        });
+
+        Button topics_btn = view.findViewById(R.id.btn_topics);
+        topics_btn.setPaintFlags(topics_btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+        topics_btn.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_topics);
         });
     }
 

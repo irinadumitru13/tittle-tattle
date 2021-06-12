@@ -9,7 +9,7 @@ import java.util.Set;
 
 public class User {
 
-    private User user;
+    private static User user;
 
     private final String id;
 
@@ -19,8 +19,9 @@ public class User {
 
     //TODO add more fields :)
 
-    public User getUser(String id) {
-        if (this.user == null) {
+    //TODO modify so no parameter given... would be a pain in the ass...
+    public static User getUser(String id) {
+        if (user == null) {
             user = new User(id);
         }
 

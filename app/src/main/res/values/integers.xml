@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- category IDs -->
+    <integer-array name="categories_resources_id">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+    </integer-array>
+
+    <!-- 11 more categories can be added -->
+
+    <!-- area of activity subtopics IDs -->
+    <integer-array name="area_of_activity_id">
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+        <item>31</item>
+        <item>32</item>
+        <item>33</item>
+        <item>34</item>
+        <item>35</item>
+        <item>36</item>
+        <item>37</item>
+        <item>38</item>
+        <item>39</item>
+        <item>40</item>
+        <item>41</item>
+        <item>42</item>
+        <item>43</item>
+        <item>44</item>
+        <item>45</item>
+        <item>46</item>
+        <item>47</item>
+        <item>48</item>
+        <item>49</item>
+    </integer-array>
+
+    <!-- 20 subtopics can be added here -->
+
+    <!-- arts and entertainment subtopics IDs -->
+    <integer-array name="arts_entertainment_id">
+        <item>70</item>
+        <item>71</item>
+        <item>72</item>
+        <item>73</item>
+        <item>74</item>
+        <item>75</item>
+        <item>76</item>
+        <item>77</item>
+        <item>78</item>
+        <item>79</item>
+        <item>80</item>
+        <item>81</item>
+        <item>82</item>
+        <item>83</item>
+    </integer-array>
+
+    <!-- 17 subtopics can be added here -->
+
+    <!-- drinks subtopics IDs -->
+    <integer-array name="drinks_id">
+        <item>100</item>
+        <item>101</item>
+        <item>102</item>
+        <item>103</item>
+        <item>104</item>
+        <item>105</item>
+        <item>106</item>
+        <item>107</item>
+        <item>108</item>
+    </integer-array>
+
+    <!-- 22 more subtopics can be added here -->
+
+    <!-- education subtopics IDs -->
+    <integer-array name="education_id">
+        <item>130</item>
+        <item>131</item>
+        <item>132</item>
+        <item>133</item>
+        <item>134</item>
+        <item>135</item>
+        <item>136</item>
+        <item>137</item>
+    </integer-array>
+
+    <!-- 23 subtopics can be added here -->
+
+    <!-- real estates subtopics IDs -->
+    <integer-array name="real_estates_id">
+        <item>160</item>
+        <item>161</item>
+        <item>162</item>
+        <item>163</item>
+        <item>164</item>
+        <item>165</item>
+        <item>166</item>
+        <item>167</item>
+    </integer-array>
+
+    <!-- 23 subtopics can be added here -->
+
+    <!-- food subtopics IDs -->
+    <integer-array name="food_id">
+        <item>190</item>
+        <item>191</item>
+        <item>192</item>
+        <item>193</item>
+        <item>194</item>
+        <item>195</item>
+        <item>196</item>
+        <item>197</item>
+        <item>198</item>
+        <item>199</item>
+        <item>200</item>
+        <item>201</item>
+        <item>202</item>
+        <item>203</item>
+        <item>204</item>
+    </integer-array>
+
+    <!-- 13 subtopics can be added here -->
+
+    <!-- others subtopics IDs -->
+    <integer-array name="others_id">
+        <item>220</item>
+        <item>221</item>
+        <item>222</item>
+    </integer-array>
+
+    <!-- 18 subtopics can be added here -->
+
+    <!-- shopping subtopics IDs -->
+    <integer-array name="shopping_id">
+        <item>240</item>
+        <item>241</item>
+        <item>242</item>
+        <item>243</item>
+        <item>244</item>
+        <item>245</item>
+        <item>246</item>
+        <item>247</item>
+        <item>248</item>
+        <item>249</item>
+        <item>250</item>
+        <item>251</item>
+        <item>252</item>
+        <item>253</item>
+        <item>254</item>
+        <item>255</item>
+        <item>256</item>
+        <item>257</item>
+        <item>258</item>
+    </integer-array>
+
+    <!-- 12 subtopics can be added here -->
+
+    <!-- sports subtopics IDs -->
+    <integer-array name="sports_id">
+        <item>270</item>
+        <item>271</item>
+        <item>272</item>
+        <item>273</item>
+        <item>274</item>
+        <item>275</item>
+        <item>276</item>
+        <item>277</item>
+        <item>278</item>
+        <item>279</item>
+        <item>280</item>
+        <item>281</item>
+        <item>282</item>
+        <item>283</item>
+        <item>284</item>
+        <item>285</item>
+        <item>286</item>
+        <item>287</item>
+        <item>288</item>
+        <item>289</item>
+        <item>290</item>
+        <item>291</item>
+    </integer-array>
+</resources>

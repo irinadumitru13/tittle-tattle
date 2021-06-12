@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_navigation_home_to_subscriptions"
             app:destination="@id/subscriptions" />
+        <action
+            android:id="@+id/action_navigation_home_to_topics"
+            app:destination="@id/topics" />
     </fragment>
 
     <fragment
@@ -33,4 +36,9 @@
         android:name="com.example.tittle_tattle.ui.homeScreen.fragments.SubscriptionsFragment"
         android:label="Subscriptions"
         tools:layout="@layout/fragment_subscriptions" />
+    <fragment
+        android:id="@+id/topics"
+        android:name="com.example.tittle_tattle.ui.homeScreen.fragments.TopicsFragment"
+        android:label="fragment_topics"
+        tools:layout="@layout/fragment_topics" />
 </navigation>

@@ -2,6 +2,7 @@ package com.example.tittle_tattle.ui.homeScreen;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -23,6 +24,7 @@ import com.facebook.login.LoginManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class HomeActivity extends AppCompatActivity {
@@ -71,8 +73,9 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intentLogIn);
         });
 
-        Log.i("friends", sharedViewModel.getFriends().toString());
-//
+//        Log.i("[RESOURCES]", String.valueOf(getResources().getIdentifier("area_of_activity", "array", getPackageName())));
+//        Log.i("[RESOURCES]", Arrays.toString(getResources().getStringArray(getResources().getIdentifier("area_of_activity", "array", getPackageName()))));
+        //
 //        // get pages of authenticated user
 //        new GraphRequest(
 //                accessToken,

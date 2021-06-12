@@ -4,31 +4,38 @@
     <string name="facebook_app_id">4508518975843277</string>
     <string name="fb_login_protocol_scheme">fb4508518975843277</string>
 
-<!--    <string name="title_activity_main">Tittle-Tattle</string>-->
     <string name="title_activity_login">LoginActivity</string>
-<!--    <string name="title_activity_home">Home</string>-->
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="main_app_name">tittle-tattle</string>
     <string name="img_login_content_desc">Login image</string>
-<!--    <string name="dummy_button">Dummy Button</string>-->
-<!--    <string name="dummy_content">DUMMY\nCONTENT</string>-->
-    <string name="my_interests">My subscriptions</string>
-    <string name="home_img_content_desc">Home image</string>
-    <string name="welcome_back">Welcome back,</string>
+    <string name="home_img_content_desc">Home page image</string>
     <string name="main_activity_image">Main image</string>
+    <string name="my_subscriptions">My subscriptions</string>
+    <string name="welcome_back">Welcome back,</string>
 
-    <string-array name="categories">
-        <item>Area of activity</item>
-        <item>Arts &amp; Entertainment</item>
-        <item>Education</item>
-        <item>Real estates</item>
-        <item>Drinks</item>
-        <item>Food</item>
-        <item>Shopping</item>
-        <item>Sports</item>
-        <item>Others</item>
+    <string name="area_of_activity">Area of activity</string>
+    <string name="arts_entertainment">Arts &amp; Entertainment</string>
+    <string name="drinks">Drinks</string>
+    <string name="education">Education</string>
+    <string name="food">Food</string>
+    <string name="real_estates">Real estates</string>
+    <string name="shopping">Shopping</string>
+    <string name="sports">Sports</string>
+    <string name="others">Others</string>
+    <string name="topics">Topics</string>
+
+    <string-array name="categories_resources" translatable="false">
+        <item>area_of_activity</item>
+        <item>arts_entertainment</item>
+        <item>drinks</item>
+        <item>education</item>
+        <item>food</item>
+        <item>real_estates</item>
+        <item>shopping</item>
+        <item>sports</item>
+        <item>others</item>
     </string-array>
 
     <string-array name="area_of_activity">
@@ -104,7 +111,7 @@
         <item>University</item>
     </string-array>
 
-    <string-array name="estates">
+    <string-array name="real_estates">
         <item>Campsite</item>
         <item>Caravan park</item>
         <item>Flats</item>
@@ -176,6 +183,7 @@
         <item>Ice skating</item>
         <item>Karting</item>
         <item>Paintball</item>
+        <item>Races</item>
         <item>Rafting/ kayaking</item>
         <item>Rugby</item>
         <item>Ski</item>
@@ -183,15 +191,6 @@
         <item>Swimming</item>
         <item>Tennis</item>
         <item>Yoga</item>
-        <item>Philosophy</item>
-        <item>Physics</item>
-        <item>Politics</item>
-        <item>Political relations</item>
-        <item>Psychology</item>
-        <item>Religion</item>
-        <item>Sociology</item>
-        <item>Theatre &amp; cinema</item>
-        <item>Writing</item>
     </string-array>
 
 </resources>

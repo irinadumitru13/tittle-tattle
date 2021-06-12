@@ -21,6 +21,7 @@ public class SubscriptionsFragment extends Fragment {
     private SharedViewModel sharedViewModel;
     private FragmentSubscriptionsBinding binding;
 
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);

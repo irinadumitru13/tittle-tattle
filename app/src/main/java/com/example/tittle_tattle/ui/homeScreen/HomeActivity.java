@@ -2,11 +2,9 @@ package com.example.tittle_tattle.ui.homeScreen;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -17,8 +15,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.tittle_tattle.R;
-import com.example.tittle_tattle.data.AppDatabase;
-import com.example.tittle_tattle.data.models.User;
 import com.example.tittle_tattle.databinding.ActivityHomeBinding;
 import com.example.tittle_tattle.ui.LoginActivity;
 import com.facebook.AccessToken;
@@ -26,10 +22,7 @@ import com.facebook.login.LoginManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 
-import java.util.Arrays;
 import java.util.Objects;
-
-import io.reactivex.rxjava3.core.Flowable;
 
 public class HomeActivity extends AppCompatActivity {
     private ActivityHomeBinding binding;
@@ -49,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
         SharedViewModel sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         sharedViewModel.setAccessToken(accessToken);
+        sharedViewModel.getSubscriptions();
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

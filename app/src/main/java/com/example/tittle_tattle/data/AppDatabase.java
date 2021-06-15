@@ -2,6 +2,7 @@ package com.example.tittle_tattle.data;
 
 import android.content.Context;
 
+import androidx.room.AutoMigration;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
@@ -21,7 +22,7 @@ public abstract class AppDatabase extends RoomDatabase {
     private static final String db_name = "tittle_tattle";
     private static final int NUMBER_OF_THREADS = 4;
 
-    public static AppDatabase database;
+    private static AppDatabase database;
 
     public abstract UserDAO userDAO();
 
@@ -52,6 +53,14 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public void insertUser(User user) {
         database.userDAO().insert(user);
+    }
+
+    public void subscribe(Subscription subscription) {
+        database.subscriptionDAO().insert(subscription);
+    }
+
+    public void unsubscribe(Subscription subscription) {
+        database.subscriptionDAO().delete(subscription);
     }
 
 }

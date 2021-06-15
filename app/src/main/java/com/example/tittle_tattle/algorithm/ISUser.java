@@ -3,6 +3,7 @@ package com.example.tittle_tattle.algorithm;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.reactivex.disposables.CompositeDisposable;
 
 public class ISUser {
 

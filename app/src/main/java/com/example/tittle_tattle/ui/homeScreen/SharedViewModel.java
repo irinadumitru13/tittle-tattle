@@ -1,5 +1,6 @@
 package com.example.tittle_tattle.ui.homeScreen;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -15,7 +16,9 @@ import androidx.loader.content.AsyncTaskLoader;
 
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.data.models.User;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.HttpMethod;
@@ -26,8 +29,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import io.reactivex.Scheduler;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class SharedViewModel extends AndroidViewModel {
     private final AppDatabase database;
@@ -106,6 +115,7 @@ public class SharedViewModel extends AndroidViewModel {
         return state.getLiveData("dashboard");
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class GetUserTask extends AsyncTask<Void, Void, User> {
         private final AccessToken accessToken;
 
@@ -153,5 +163,20 @@ public class SharedViewModel extends AndroidViewModel {
             ISUser.getUser().setFullName(state.get("full_name"));
             ISUser.getUser().setId(accessToken.getUserId());
         }
+    }
+
+    public void getSubscriptions() {
+        new CompositeDisposable().add(database.subscriptionDAO().findAllByUserId(getAccessToken().getUserId())
+                .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.computation())
+        .subscribe(subscriptions -> {
+            for (Subscription subscription : subscriptions) {
+                ISUser.getUser().subscribe(
+                        new Subcategory(
+                                subscription.getName(),
+                                subscription.getSubscription_id(),
+                                subscription.getCategory_id()));
+            }
+        }, throwable -> Log.i("[SUBSCRIPTIONS]", "No subscriptions yet.")));
     }
 }

@@ -10,19 +10,17 @@ import static androidx.room.ForeignKey.CASCADE;
 @Entity(tableName = "subscriptions")
 public class Subscription {
     @PrimaryKey(autoGenerate = true)
-    private int id;
+    private Integer id;
+
+    private final int subscription_id;
 
     @NonNull
-    private int subscription_id;
+    private final String name;
+
+    private final int category_id;
 
     @NonNull
-    private String name;
-
-    @NonNull
-    private int category_id;
-
-    @NonNull
-    private String user_id;
+    private final String user_id;
 
     public Subscription(int subscription_id, @NonNull String name, int category_id, @NonNull String user_id) {
         this.subscription_id = subscription_id;
@@ -49,11 +47,11 @@ public class Subscription {
         return user_id;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 }

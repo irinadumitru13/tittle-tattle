@@ -37,8 +37,6 @@ public class HomeFragment extends Fragment {
         final TextView textView = binding.nameText;
         sharedViewModel.getFullNameLive().observe(getViewLifecycleOwner(), textView::setText);
 
-//        AppDatabase.getInstance(getContext()).userDAO().insert(new User(sharedViewModel.getAccessToken().getUserId(), sharedViewModel.getFullName()));
-        
         return root;
     }
 

@@ -1,6 +1,8 @@
 package com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.adapters;
 
 import android.graphics.Paint;
+import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tittle_tattle.R;
 import com.example.tittle_tattle.algorithm.ISUser;
+import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
@@ -79,10 +83,37 @@ public class SubcategoryRecyclerViewAdapter extends RecyclerView.Adapter<Subcate
             else
                 button.setText(R.string.subscribe);
 
-            if (ISUser.getUser().isSubscribed(subcategory.getSubcategoryId()))
+            if (ISUser.getUser().isSubscribed(subcategory.getSubcategoryId())) {
                 ISUser.getUser().unsubscribe(subcategory);
-            else
+
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.i("[DB]", "unsubscribe");
+                        AppDatabase.getInstance(view.getContext()).unsubscribe(
+                                new Subscription(
+                                        subcategory.getSubcategoryId(),
+                                        subcategory.getName(),
+                                        subcategory.getCategoryId(),
+                                        ISUser.getUser().getId()));
+                    }
+                });
+            } else {
                 ISUser.getUser().subscribe(subcategory);
+
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.i("[DB]", "subscribe");
+                        AppDatabase.getInstance(view.getContext()).subscribe(
+                                new Subscription(
+                                        subcategory.getSubcategoryId(),
+                                        subcategory.getName(),
+                                        subcategory.getCategoryId(),
+                                        ISUser.getUser().getId()));
+                    }
+                });
+            }
         });
     }
 }

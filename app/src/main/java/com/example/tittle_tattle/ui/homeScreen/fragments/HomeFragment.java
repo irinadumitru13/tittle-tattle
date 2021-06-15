@@ -2,7 +2,6 @@ package com.example.tittle_tattle.ui.homeScreen.fragments;
 
 import android.graphics.Paint;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +14,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.User;
 import com.example.tittle_tattle.databinding.FragmentHomeBinding;
 import com.example.tittle_tattle.ui.homeScreen.SharedViewModel;
 
@@ -34,7 +35,9 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         final TextView textView = binding.nameText;
-        sharedViewModel.getFullName().observe(getViewLifecycleOwner(), textView::setText);
+        sharedViewModel.getFullNameLive().observe(getViewLifecycleOwner(), textView::setText);
+
+//        AppDatabase.getInstance(getContext()).userDAO().insert(new User(sharedViewModel.getAccessToken().getUserId(), sharedViewModel.getFullName()));
         
         return root;
     }

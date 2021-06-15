@@ -1,6 +1,6 @@
 package com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.adapters;
 
-import android.util.Log;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
@@ -56,15 +57,32 @@ public class SubcategoryRecyclerViewAdapter extends RecyclerView.Adapter<Subcate
         return subcategoryList.size();
     }
 
-    public SViewHolder onCreateSubcategoryViewHolder(ViewGroup parent) {
+    public SViewHolder onCreateSubcategoryViewHolder(@NotNull ViewGroup parent) {
         return new SViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.subcategory_row, parent, false));
     }
 
-    public void onBindSubcategoryViewHolder(SViewHolder sViewHolder, Subcategory subcategory) {
+    public void onBindSubcategoryViewHolder(@NotNull SViewHolder sViewHolder, @NotNull Subcategory subcategory) {
         sViewHolder.textView.setText(subcategory.getName());
+        sViewHolder.button.setPaintFlags(sViewHolder.button.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+        if (ISUser.getUser().isSubscribed(subcategory.getSubcategoryId()))
+            sViewHolder.button.setText(R.string.unsubscribe);
+        else
+            sViewHolder.button.setText(R.string.subscribe);
 
         sViewHolder.button.setOnClickListener(view -> {
-            Log.i("[BUTTON]", "Pressed " + subcategory.getName() + ", " + subcategory.getSubcategoryId());
+            Button button = view.findViewById(R.id.btn_subscribe);
+            button.setPaintFlags(button.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+            if (button.getText().equals("subscribe"))
+                button.setText(R.string.unsubscribe);
+            else
+                button.setText(R.string.subscribe);
+
+            if (ISUser.getUser().isSubscribed(subcategory.getSubcategoryId()))
+                ISUser.getUser().unsubscribe(subcategory);
+            else
+                ISUser.getUser().subscribe(subcategory);
         });
     }
 }

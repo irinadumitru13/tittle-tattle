@@ -17,6 +17,8 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.User;
 import com.example.tittle_tattle.databinding.ActivityHomeBinding;
 import com.example.tittle_tattle.ui.LoginActivity;
 import com.facebook.AccessToken;
@@ -26,6 +28,8 @@ import com.google.gson.Gson;
 
 import java.util.Arrays;
 import java.util.Objects;
+
+import io.reactivex.rxjava3.core.Flowable;
 
 public class HomeActivity extends AppCompatActivity {
     private ActivityHomeBinding binding;
@@ -72,9 +76,6 @@ public class HomeActivity extends AppCompatActivity {
             Intent intentLogIn = new Intent(getBaseContext(), LoginActivity.class);
             startActivity(intentLogIn);
         });
-
-//        Log.i("[RESOURCES]", String.valueOf(getResources().getIdentifier("area_of_activity", "array", getPackageName())));
-//        Log.i("[RESOURCES]", Arrays.toString(getResources().getStringArray(getResources().getIdentifier("area_of_activity", "array", getPackageName()))));
         //
 //        // get pages of authenticated user
 //        new GraphRequest(

@@ -6,15 +6,25 @@
 
     <TextView
         android:id="@+id/textSubcategory"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black" />
+        android:layout_weight="1"
+        android:fontFamily="@font/catamaran_light"
+        android:textColor="@android:color/black"
+        android:textSize="20sp" />
 
     <Button
         android:id="@+id/btn_subscribe"
+        style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:text="Button" />
-    <!--         se va schimba textul in functie de ce contine utilizatorul in abonari -->
+        android:background="#e9ecef"
+        android:fontFamily="@font/gruppo"
+        android:shadowColor="#e9ecef"
+        android:textAlignment="center"
+        android:textAllCaps="false"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="#5f4b66"
+        android:textSize="18sp"
+        android:textStyle="bold" />
 </LinearLayout>

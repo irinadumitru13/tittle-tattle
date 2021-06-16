@@ -15,6 +15,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.algorithm.DisseminationService;
 import com.example.tittle_tattle.databinding.ActivityHomeBinding;
 import com.example.tittle_tattle.ui.LoginActivity;
 import com.facebook.AccessToken;
@@ -34,6 +35,10 @@ public class HomeActivity extends AppCompatActivity {
 //        View decorView = getWindow().getDecorView();
 //        int uiOptions = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 //        decorView.setSystemUiVisibility(uiOptions);
+
+        // start service for dissemination
+//        Intent intentService = new Intent(this, DisseminationService.class);
+//        startService(intentService);
 
         Intent intent = getIntent();
         String serializedAccessToken = intent.getStringExtra("access_token");

@@ -59,8 +59,8 @@ public abstract class AppDatabase extends RoomDatabase {
         database.subscriptionDAO().insert(subscription);
     }
 
-    public void unsubscribe(Subscription subscription) {
-        database.subscriptionDAO().delete(subscription);
+    public void unsubscribe(int subscription_id, String user_id) {
+        database.subscriptionDAO().delete(subscription_id, user_id);
     }
 
 }

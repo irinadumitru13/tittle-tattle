@@ -91,11 +91,8 @@ public class SubcategoryRecyclerViewAdapter extends RecyclerView.Adapter<Subcate
                     public void run() {
                         Log.i("[DB]", "unsubscribe");
                         AppDatabase.getInstance(view.getContext()).unsubscribe(
-                                new Subscription(
                                         subcategory.getSubcategoryId(),
-                                        subcategory.getName(),
-                                        subcategory.getCategoryId(),
-                                        ISUser.getUser().getId()));
+                                        ISUser.getUser().getId());
                     }
                 });
             } else {

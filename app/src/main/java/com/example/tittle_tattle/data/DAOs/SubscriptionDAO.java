@@ -1,5 +1,6 @@
 package com.example.tittle_tattle.data.DAOs;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -16,8 +17,8 @@ public interface SubscriptionDAO {
     @Insert()
     void insert(Subscription subscription);
 
-    @Delete
-    void delete(Subscription subscription);
+    @Query("DELETE FROM subscriptions WHERE subscription_id = :subscription_id AND user_id = :user_id")
+    void delete(int subscription_id, String user_id);
 
     @Query("SELECT * FROM subscriptions WHERE user_id = :user_id")
     Single<List<Subscription>> findAllByUserId(String user_id);

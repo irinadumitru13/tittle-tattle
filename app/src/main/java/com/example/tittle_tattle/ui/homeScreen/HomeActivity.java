@@ -42,7 +42,7 @@ public class HomeActivity extends AppCompatActivity {
         SharedViewModel sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         sharedViewModel.setAccessToken(accessToken);
-        sharedViewModel.getSubscriptions();
+        sharedViewModel.updateSubscriptions();
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

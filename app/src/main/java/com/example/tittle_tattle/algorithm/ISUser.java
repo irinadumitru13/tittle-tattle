@@ -4,12 +4,14 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import io.reactivex.disposables.CompositeDisposable;
@@ -54,7 +56,24 @@ public class ISUser {
         this.id = id;
     }
 
-    public HashSet<Integer> getSubscriptions() {
+    public List<Subscription> getSubscriptions() {
+        List<Subscription> subscriptions = new ArrayList<>();
+        int catSize = categoryTopics.size();
+
+        for (int i = 0; i < catSize; i++) {
+            for (Integer subcategory : categoryTopics.get(categoryTopics.keyAt(i))) {
+                subscriptions.add(new Subscription(
+                        subcategory,
+                        mySubscriptions.get(subcategory),
+                        categoryTopics.keyAt(i),
+                        id));
+            }
+        }
+
+        return subscriptions;
+    }
+
+    public HashSet<Integer> getTopics() {
         HashSet<Integer> subscriptions = new HashSet<>();
         int size = mySubscriptions.size();
 

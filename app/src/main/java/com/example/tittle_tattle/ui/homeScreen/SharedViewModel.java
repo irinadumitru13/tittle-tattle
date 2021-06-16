@@ -13,11 +13,14 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.loader.content.AsyncTaskLoader;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.data.models.User;
+import com.example.tittle_tattle.ui.homeScreen.fragments.subscriptionsRecycler.SubscriptionRecyclerViewAdapter;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.adapters.SubcategoryRecyclerViewAdapter;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -33,15 +36,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import io.reactivex.Observable;
 import io.reactivex.Scheduler;
+import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class SharedViewModel extends AndroidViewModel {
     private final AppDatabase database;
-    private MutableLiveData<String> fullName;
     private final SavedStateHandle state;
+    private Single<List<Subscription>> subscriptions;
 
     public SharedViewModel(Application application, SavedStateHandle stateHandle) {
         super(application);
@@ -49,6 +55,10 @@ public class SharedViewModel extends AndroidViewModel {
         this.state = stateHandle;
         state.set("notifications", "This is notifications fragment");
         state.set("dashboard", "This is dashboard fragment");
+    }
+
+    private AppDatabase getDatabase() {
+        return database;
     }
 
     public void setAccessToken(@NotNull AccessToken accessToken) {
@@ -165,7 +175,7 @@ public class SharedViewModel extends AndroidViewModel {
         }
     }
 
-    public void getSubscriptions() {
+    public void updateSubscriptions() {
         new CompositeDisposable().add(database.subscriptionDAO().findAllByUserId(getAccessToken().getUserId())
                 .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.computation())
@@ -178,5 +188,9 @@ public class SharedViewModel extends AndroidViewModel {
                                 subscription.getCategory_id()));
             }
         }, throwable -> Log.i("[SUBSCRIPTIONS]", "No subscriptions yet.")));
+    }
+
+    public Observable<List<Subscription>> getSubscriptions() {
+        return database.subscriptionDAO().findAllByUserId(getAccessToken().getUserId()).toObservable();
     }
 }

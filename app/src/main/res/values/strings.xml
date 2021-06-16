@@ -27,6 +27,9 @@
     <string name="sports">Sports</string>
     <string name="others">Others</string>
     <string name="topics">Topics</string>
+    <string name="empty_rec">No subscriptions.</string>
+    <string name="empty_image">Empty image</string>
+    <string name="go_to_topics_for_more">Go to topics for more.</string>
 
     <string-array name="categories_resources" translatable="false">
         <item>area_of_activity</item>

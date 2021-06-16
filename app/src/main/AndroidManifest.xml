@@ -23,7 +23,7 @@
         </activity>
         <activity
             android:name=".ui.homeScreen.HomeActivity"
-            android:label="@string/title_home" />
+            android:label="@string/title_home"/>
         <activity
             android:name=".ui.LoginActivity"
             android:label="@string/title_activity_login">

@@ -2,25 +2,17 @@ package com.example.tittle_tattle.ui.homeScreen;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.SavedStateHandle;
-import androidx.loader.content.AsyncTaskLoader;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.data.models.User;
-import com.example.tittle_tattle.ui.homeScreen.fragments.subscriptionsRecycler.SubscriptionRecyclerViewAdapter;
-import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.adapters.SubcategoryRecyclerViewAdapter;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -32,16 +24,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.observers.DisposableObserver;
 import io.reactivex.schedulers.Schedulers;
 
 public class SharedViewModel extends AndroidViewModel {

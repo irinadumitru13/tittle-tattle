@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-
 public class TopicsFragment extends Fragment {
     private FragmentTopicsBinding binding;
 

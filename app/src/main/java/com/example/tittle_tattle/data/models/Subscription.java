@@ -2,10 +2,7 @@ package com.example.tittle_tattle.data.models;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
-import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
-
-import static androidx.room.ForeignKey.CASCADE;
 
 @Entity(tableName = "subscriptions")
 public class Subscription {

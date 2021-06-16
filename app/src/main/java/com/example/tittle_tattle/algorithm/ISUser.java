@@ -3,7 +3,6 @@ package com.example.tittle_tattle.algorithm;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
 
@@ -13,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import io.reactivex.disposables.CompositeDisposable;
 
 public class ISUser {
 

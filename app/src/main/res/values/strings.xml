@@ -30,6 +30,11 @@
     <string name="empty_rec">No subscriptions.</string>
     <string name="empty_image">Empty image</string>
     <string name="go_to_topics_for_more">Go to topics for more.</string>
+    <string name="message_hint">message</string>
+    <string name="publish_btn">publish</string>
+    <string name="no_topics_text1">You aren\'t subscribed to any topics.</string>
+    <string name="no_topics_text2">Subscriptions needed for publishing messages.</string>
+    <string name="publish_image">Publish image</string>
 
     <string-array name="categories_resources" translatable="false">
         <item>area_of_activity</item>

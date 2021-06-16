@@ -20,9 +20,13 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.example.tittle_tattle.ui.homeScreen.fragments.DashboardFragment"
+        android:name="com.example.tittle_tattle.ui.homeScreen.fragments.publish.DashboardFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_dashboard" >
+        <action
+            android:id="@+id/action_navigation_dashboard_to_navigation_home"
+            app:destination="@id/navigation_home" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_notifications"

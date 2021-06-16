@@ -14,8 +14,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.tittle_tattle.R;
-import com.example.tittle_tattle.data.AppDatabase;
-import com.example.tittle_tattle.data.models.User;
 import com.example.tittle_tattle.databinding.FragmentHomeBinding;
 import com.example.tittle_tattle.ui.homeScreen.SharedViewModel;
 

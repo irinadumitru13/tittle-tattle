@@ -1,5 +1,6 @@
 package com.example.tittle_tattle.ui.homeScreen.fragments;
 
+import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.algorithm.DisseminationService;
 import com.example.tittle_tattle.databinding.FragmentHomeBinding;
 import com.example.tittle_tattle.ui.homeScreen.SharedViewModel;
 

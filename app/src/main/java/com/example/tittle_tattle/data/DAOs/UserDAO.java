@@ -13,5 +13,5 @@ public interface UserDAO {
     void insert(User user);
 
     @Query("SELECT * FROM users WHERE user_id = :user_id")
-    User findUserById(String user_id);
+    User findUserById(long user_id);
 }

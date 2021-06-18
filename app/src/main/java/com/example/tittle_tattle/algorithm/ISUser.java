@@ -17,7 +17,7 @@ public class ISUser {
 
     private static ISUser ISUser;
 
-    private String id;
+    private Long id;
 
     private String fullName;
 
@@ -45,11 +45,11 @@ public class ISUser {
         this.socialNetwork = new HashSet<>();
     }
 
-    public String getId() {
+    public Long getId() {
         return this.id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

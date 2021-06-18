@@ -16,8 +16,8 @@ public interface SubscriptionDAO {
     void insert(Subscription subscription);
 
     @Query("DELETE FROM subscriptions WHERE subscription_id = :subscription_id AND user_id = :user_id")
-    void delete(int subscription_id, String user_id);
+    void delete(int subscription_id, long user_id);
 
     @Query("SELECT * FROM subscriptions WHERE user_id = :user_id")
-    Single<List<Subscription>> findAllByUserId(String user_id);
+    Single<List<Subscription>> findAllByUserId(long user_id);
 }

@@ -17,9 +17,9 @@ public class Subscription {
     private final int category_id;
 
     @NonNull
-    private final String user_id;
+    private final Long user_id;
 
-    public Subscription(int subscription_id, @NonNull String name, int category_id, @NonNull String user_id) {
+    public Subscription(int subscription_id, @NonNull String name, int category_id, @NonNull Long user_id) {
         this.subscription_id = subscription_id;
         this.name = name;
         this.category_id = category_id;
@@ -40,7 +40,7 @@ public class Subscription {
     }
 
     @NonNull
-    public String getUser_id() {
+    public Long getUser_id() {
         return user_id;
     }
 

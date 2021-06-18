@@ -3,12 +3,21 @@ package com.example.tittle_tattle.algorithm;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.tittle_tattle.algorithm.proto.Contact;
+import com.example.tittle_tattle.algorithm.proto.EncounteredNodes;
+import com.example.tittle_tattle.algorithm.proto.History;
+import com.example.tittle_tattle.algorithm.proto.Interests;
+import com.example.tittle_tattle.algorithm.proto.MessageExch;
+import com.example.tittle_tattle.algorithm.proto.SocialNetwork;
+import com.example.tittle_tattle.data.models.Message;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -24,21 +33,26 @@ import com.google.android.gms.nearby.connection.Payload;
 import com.google.android.gms.nearby.connection.PayloadCallback;
 import com.google.android.gms.nearby.connection.PayloadTransferUpdate;
 import com.google.android.gms.nearby.connection.Strategy;
+import com.google.protobuf.InvalidProtocolBufferException;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * DisseminationService. This Service has 3 {@link State}s.
  *
  * <p>{@link State#UNKNOWN}: We cannot do anything while we're in this state. The app is likely in
- * the background. TODO most probably not useful
+ * the background.
  *
  * <p>{@link State#SEARCHING}: Our default state (after we've connected). We constantly listen for a
  * device to advertise near us, while simultaneously advertising ourselves.
@@ -47,7 +61,6 @@ import java.util.Set;
  * down the volume keys and speaking into the phone. Advertising and discovery have both stopped.
  */
 public class DisseminationService extends Service {
-//    private Looper serviceLooper;
     private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
     private static final String SERVICE_ID = "com.example.tittle_tattle.SERVICE_ID";
 
@@ -59,21 +72,6 @@ public class DisseminationService extends Service {
 
     /** Our handler to Nearby Connections. */
     private ConnectionsClient mConnectionsClient;
-
-    /** The devices we've discovered near us. */
-    private final Map<String, Endpoint> mDiscoveredEndpoints = new HashMap<>();
-
-    /**
-     * The devices we have pending connections to. They will stay pending until we call {@link
-     * #acceptConnection(Endpoint)} or {@link #rejectConnection(Endpoint)}.
-     */
-    private final Map<String, Endpoint> mPendingConnections = new HashMap<>();
-
-    /**
-     * The devices we are currently connected to. For advertisers, this may be large. For discoverers,
-     * there will only be one entry in this map.
-     */
-    private final Map<String, Endpoint> mEstablishedConnections = new HashMap<>();
 
     /**
      * True if we are asking a discovered device to connect to us. While we ask, we cannot ask another
@@ -87,22 +85,80 @@ public class DisseminationService extends Service {
     /** True if we are advertising. */
     private boolean mIsAdvertising = false;
 
+    /** Normalization value for friendship. */
+    private double maxFriendship = Double.MIN_VALUE;
+
+    /** Normalization value for similarity. */
+    private double maxSimilarity = Double.MIN_VALUE;
+
+    /** Normalization value for contacts. */
+    private double maxContacts = Double.MIN_VALUE;
+
+    /** Aggregation weights. */
+    private final double w1 = 0.25, w2 = 0.25, w3 = 0.25, w4 = 0.25;
+
+    /** Social network threshold. */
+    private double socialNetworkThreshold;
+
+    /** Interest threshold. */
+    private double interestThreshold;
+
+    /** Contacts threshold. */
+    private int contactsThreshold;
+
+    /** How many contacts has this node made. */
+    private long encounters = 0;
+
+    /** The devices we've discovered near us. */
+    private final Map<String, Endpoint> mDiscoveredEndpoints = new HashMap<>();
+
+    /**
+     * The devices we have pending connections to. They will stay pending until we call {@link
+     * #acceptConnection(Endpoint)} or {@link #rejectConnection(Endpoint)}.
+     */
+    private final Map<String, Endpoint> mPendingConnections = new HashMap<>();
+
+    /**
+     * The devices we are currently connected to. First interaction means history exchange.
+     * For advertisers, this may be large. For discoverers, there will only be one entry in this map.
+     */
+    private final Map<String, Endpoint> mHistoryExchangeConnections = new HashMap<>();
+
+    /**
+     * The devices we are currently connected to. After history exchange, messages can be exchanged.
+     * For advertisers, this may be large. For discoverers, there will only be one entry in this map.
+     */
+    private final Map<String, Endpoint> mMessageExchangeConnections = new HashMap<>();
+
+    /** List of nodes encountered by the current node during a time window. */
+    private final Map<Long, ContactInfo> encounteredNodes = new HashMap<>();
+
+    /** Social network */
+    private final Set<Long> socialNetwork = new HashSet<>();
+
+    /** Interests */
+    private final HashSet<Integer> interests = new HashSet<>();
+
+    /** Messages to be transmitted */
+    private final List<Message> messages = new LinkedList<>();
+
     @Override
     public void onCreate() {
-//        HandlerThread thread = new HandlerThread("DisseminationService",
-//                Process.THREAD_PRIORITY_BACKGROUND);
-//        thread.start();
-//
-//        serviceLooper = thread.getLooper();
-        // TODO nu stiu daca mai trebuie facut ceva
+        super.onCreate();
+        // TODO extract data from db
+        Log.i("[NEARBY]", "Service onCreate()");
+
+        mName = String.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0));
+
         mConnectionsClient = Nearby.getConnectionsClient(this);
+        setState(State.SEARCHING);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+        super.onStartCommand(intent, flags, startId);
+        Toast.makeText(this, "tittle-tattle service starting", Toast.LENGTH_SHORT).show();
 
-        // TODO sau START_REDELIVER_INTENT
         return START_STICKY;
     }
 
@@ -114,26 +170,28 @@ public class DisseminationService extends Service {
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "service done", Toast.LENGTH_SHORT).show();
-        // TODO maybe sth done here?
+        super.onDestroy();
+        Toast.makeText(this, "tittle-tattle service done", Toast.LENGTH_SHORT).show();
+        // TODO put data in db
     }
 
     /** Callbacks for connections to other devices. */
     private final ConnectionLifecycleCallback mConnectionLifecycleCallback =
         new ConnectionLifecycleCallback() {
             @Override
-            public void onConnectionInitiated(@NotNull String endpointId, ConnectionInfo connectionInfo) {
-                Log.i("[NEARBY]", String.format("onConnectionInitiated(endpointId=%s, endpointName=%s)",
+            public void onConnectionInitiated(@NotNull String endpointId, @NotNull ConnectionInfo connectionInfo) {
+                Log.d("[NEARBY]", String.format("onConnectionInitiated(endpointId=%s, endpointName=%s)",
                                                     endpointId, connectionInfo.getEndpointName()));
 
                 Endpoint endpoint = new Endpoint(endpointId, connectionInfo.getEndpointName());
                 mPendingConnections.put(endpointId, endpoint);
+
                 DisseminationService.this.onConnectionInitiated(endpoint, connectionInfo);
             }
 
             @Override
             public void onConnectionResult(@NotNull String endpointId, @NotNull ConnectionResolution result) {
-                Log.i("[NEARBY]", String.format("onConnectionResponse(endpointId=%s, result=%s)", endpointId, result));
+                Log.d("[NEARBY]", String.format("onConnectionResponse(endpointId=%s, result=%s)", endpointId, result));
 
                 // We're no longer connecting
                 mIsConnecting = false;
@@ -151,12 +209,38 @@ public class DisseminationService extends Service {
 
             @Override
             public void onDisconnected(@NotNull String endpointId) {
-                if (!mEstablishedConnections.containsKey(endpointId)) {
+                if (!mHistoryExchangeConnections.containsKey(endpointId) ||
+                        !mMessageExchangeConnections.containsKey(endpointId)) {
                     Log.i("[NEARBY]", "Unexpected disconnection from endpoint " + endpointId);
                     return;
                 }
 
-                disconnectedFromEndpoint(mEstablishedConnections.get(endpointId));
+                // TODO calculate duration with endpoint
+                // TODO see from where to delete
+                disconnectedFromEndpoint(mHistoryExchangeConnections.get(endpointId));
+            }
+        };
+
+    /** Callbacks for discovering other devices. */
+    private final EndpointDiscoveryCallback mEndpointDiscoveryCallback =
+        new EndpointDiscoveryCallback() {
+            @Override
+            public void onEndpointFound(@NotNull String endpointId, @NotNull DiscoveredEndpointInfo info) {
+                Log.d("[NEARBY]", String.format("onEndpointFound(endpointId=%s, serviceId=%s, endpointName=%s)",
+                        endpointId, info.getServiceId(), info.getEndpointName()));
+
+                if (getServiceId().equals(info.getServiceId())) {
+                    Endpoint endpoint = new Endpoint(endpointId, info.getEndpointName());
+                    mDiscoveredEndpoints.put(endpointId, endpoint);
+
+                    onEndpointDiscovered(endpoint);
+                }
+            }
+
+            @Override
+            public void onEndpointLost(@NotNull String endpointId) {
+                Log.d("[NEARBY]", String.format("onEndpointLost(endpointId=%s)", endpointId));
+                mDiscoveredEndpoints.remove(endpointId);
             }
         };
 
@@ -165,21 +249,32 @@ public class DisseminationService extends Service {
         new PayloadCallback() {
             @Override
             public void onPayloadReceived(@NotNull String endpointId, @NotNull Payload payload) {
-                Log.i("[NEARBY]", String.format("onPayloadReceived(endpointId=%s, payload=%s)", endpointId, payload));
+                Log.d("[NEARBY]", String.format("onPayloadReceived(endpointId=%s, payload=%s)", endpointId, payload));
 
-                onReceive(mEstablishedConnections.get(endpointId), payload);
+                // received their history
+                if (mHistoryExchangeConnections.containsKey(endpointId)) {
+                    mMessageExchangeConnections.put(endpointId, mHistoryExchangeConnections.remove(endpointId));
+
+                    onReceiveHistory(Objects.requireNonNull(mMessageExchangeConnections.get(endpointId)), payload);
+                } else if (mMessageExchangeConnections.containsKey(endpointId)) {
+                    onReceiveMessage(mMessageExchangeConnections.get(endpointId), payload);
+                } else {
+                    Log.w("[NEARBY]",
+                            String.format("onPayloadReceived(endpointId=%s, payload=%s) from unknown endpoint",
+                                    endpointId, payload));
+                }
             }
 
             @Override
             public void onPayloadTransferUpdate(@NotNull String endpointId, @NotNull PayloadTransferUpdate update) {
-                Log.i("[NEARBY]", String.format("onPayloadTransferUpdate(endpointId=%s, update=%s)", endpointId, update));
+                Log.d("[NEARBY]", String.format("onPayloadTransferUpdate(endpointId=%s, update=%s)", endpointId, update));
             }
         };
 
     /**
      * Sets the device to advertising mode. It will broadcast to other devices in discovery mode.
-     * Either {@link #onAdvertisingStarted()} or {@link #onAdvertisingFailed()} will be called once
-     * we've found out if we successfully entered this mode.
+     * Either {@link #onAdvertisingStarted()} or {@link #onAdvertisingFailed(Exception e)} will be
+     * called once we've found out if we successfully entered this mode.
      */
     protected void startAdvertising() {
         mIsAdvertising = true;
@@ -191,15 +286,12 @@ public class DisseminationService extends Service {
         mConnectionsClient
             .startAdvertising(localEndpointName, getServiceId(), mConnectionLifecycleCallback, advertisingOptions.build())
 
-            .addOnSuccessListener(unusedResult -> {
-                Log.i("[NEARBY]","Now advertising endpoint " + localEndpointName);
-                onAdvertisingStarted();
-            })
+            .addOnSuccessListener(unusedResult -> onAdvertisingStarted())
 
             .addOnFailureListener(e -> {
-                mIsAdvertising = false;
-                Log.w("[NEARBY]", "startAdvertising() failed.", e);
-                onAdvertisingFailed();
+                if (!Objects.equals(e.getMessage(), "8001: STATUS_ALREADY_ADVERTISING")) {
+                    onAdvertisingFailed(e);
+                }
             });
     }
 
@@ -216,12 +308,13 @@ public class DisseminationService extends Service {
 
     /** Called when advertising successfully starts. */
     protected void onAdvertisingStarted() {
-        // TODO
+        Log.d("[NEARBY]","Now advertising endpoint " + getName());
     }
 
     /** Called when advertising fails to start. */
-    protected void onAdvertisingFailed() {
-        // TODO
+    protected void onAdvertisingFailed(Exception e) {
+        mIsAdvertising = false;
+        Log.w("[NEARBY]", "startAdvertising() failed.", e);
     }
 
     /**
@@ -236,8 +329,7 @@ public class DisseminationService extends Service {
 
     /** Accepts a connection request. */
     protected void acceptConnection(@NotNull final Endpoint endpoint) {
-        mConnectionsClient
-            .acceptConnection(endpoint.getId(), mPayloadCallback)
+        mConnectionsClient.acceptConnection(endpoint.getId(), mPayloadCallback)
             .addOnFailureListener(e -> Log.w("[NEARBY]", "acceptConnection() failed.", e));
     }
 
@@ -250,7 +342,7 @@ public class DisseminationService extends Service {
 
     /**
      * Sets the device to discovery mode. It will now listen for devices in advertising mode. Either
-     * {@link #onDiscoveryStarted()} or {@link #onDiscoveryFailed()} will be called once we've found
+     * {@link #onDiscoveryStarted()} or {@link #onDiscoveryFailed(Exception e)} will be called once we've found
      * out if we successfully entered this mode.
      */
     protected void startDiscovering() {
@@ -260,34 +352,13 @@ public class DisseminationService extends Service {
         DiscoveryOptions.Builder discoveryOptions = new DiscoveryOptions.Builder();
         discoveryOptions.setStrategy(getStrategy());
 
-        mConnectionsClient
-            .startDiscovery(getServiceId(), new EndpointDiscoveryCallback() {
-                @Override
-                public void onEndpointFound(@NotNull String endpointId, @NotNull DiscoveredEndpointInfo info) {
-                    Log.i("[NEARBY]", String.format("onEndpointFound(endpointId=%s, serviceId=%s, endpointName=%s)",
-                                                    endpointId, info.getServiceId(), info.getEndpointName()));
-
-                    if (getServiceId().equals(info.getServiceId())) {
-                        Endpoint endpoint = new Endpoint(endpointId, info.getEndpointName());
-                        mDiscoveredEndpoints.put(endpointId, endpoint);
-
-                        onEndpointDiscovered(endpoint);
-                    }
-                }
-
-                @Override
-                public void onEndpointLost(@NotNull String endpointId) {
-                    Log.i("[NEARBY]", String.format("onEndpointLost(endpointId=%s)", endpointId));
-                }
-            }, discoveryOptions.build())
-
+        mConnectionsClient.startDiscovery(getServiceId(), mEndpointDiscoveryCallback, discoveryOptions.build())
             .addOnSuccessListener(unusedResult -> onDiscoveryStarted())
 
             .addOnFailureListener(e -> {
-                Log.w("[NEARBY]", "startDiscovering() failed.", e);
-
-                mIsDiscovering = false;
-                onDiscoveryFailed();
+                if (!Objects.equals(e.getMessage(), "8002: STATUS_ALREADY_DISCOVERING")) {
+                    onDiscoveryFailed(e);
+                }
             });
     }
 
@@ -304,12 +375,13 @@ public class DisseminationService extends Service {
 
     /** Called when discovery successfully starts. Override this method to act on the event. */
     protected void onDiscoveryStarted() {
-        // TODO
+        Log.i("[NEARBY]", "Now endpoint " + getName() + "discovering");
     }
 
     /** Called when discovery fails to start. Override this method to act on the event. */
-    protected void onDiscoveryFailed() {
-        // TODO
+    protected void onDiscoveryFailed(Exception e) {
+        Log.w("[NEARBY]", "startDiscovering() failed.", e);
+        mIsDiscovering = false;
     }
 
     /**
@@ -318,22 +390,25 @@ public class DisseminationService extends Service {
      */
     protected void onEndpointDiscovered(Endpoint endpoint) {
         stopDiscovering();
-        connectedToEndpoint(endpoint);
+        connectToEndpoint(endpoint);
     }
 
     /** Disconnects from the given endpoint. */
     protected void disconnect(@NotNull Endpoint endpoint) {
         mConnectionsClient.disconnectFromEndpoint(endpoint.getId());
-        mEstablishedConnections.remove(endpoint.getId());
+
+        mHistoryExchangeConnections.remove(endpoint.getId());
+        mMessageExchangeConnections.remove(endpoint.getId());
     }
 
     /** Disconnects from all currently connected endpoints. */
     protected void disconnectFromAllEndpoints() {
-        for (Endpoint endpoint : mEstablishedConnections.values()) {
+        for (Endpoint endpoint : mHistoryExchangeConnections.values()) {
             mConnectionsClient.disconnectFromEndpoint(endpoint.getId());
         }
 
-        mEstablishedConnections.clear();
+        mHistoryExchangeConnections.clear();
+        mMessageExchangeConnections.clear();
     }
 
     /** Resets and clears all state in Nearby Connections. */
@@ -344,7 +419,7 @@ public class DisseminationService extends Service {
         mIsConnecting = false;
         mDiscoveredEndpoints.clear();
         mPendingConnections.clear();
-        mEstablishedConnections.clear();
+        mHistoryExchangeConnections.clear();
     }
 
     /**
@@ -358,8 +433,12 @@ public class DisseminationService extends Service {
         mIsConnecting = true;
 
         // Ask to connect
-        mConnectionsClient
-            .requestConnection(getName(), endpoint.getId(), mConnectionLifecycleCallback)
+        mConnectionsClient.requestConnection(getName(), endpoint.getId(), mConnectionLifecycleCallback)
+            .addOnSuccessListener(unusedResult -> {
+                Log.i("[NEARBY]","Connected to endpoint: " + endpoint.getId());
+
+                connectedToEndpoint(endpoint);
+            })
 
             .addOnFailureListener(e -> {
                 Log.w("[NEARBY]", "requestConnection() failed. ", e);
@@ -377,14 +456,25 @@ public class DisseminationService extends Service {
     private void connectedToEndpoint(Endpoint endpoint) {
         Log.i("[NEARBY]", String.format("connectedToEndpoint(endpoint=%s)", endpoint));
 
-        mEstablishedConnections.put(endpoint.getId(), endpoint);
+        encounters++;
+        mHistoryExchangeConnections.put(endpoint.getId(), endpoint);
+        Long encounteredId = Long.parseLong(endpoint.getId());
+
+        if (encounteredNodes.containsKey(encounteredId)) {
+            ContactInfo contactInfo = encounteredNodes.get(encounteredId);
+            contactInfo.incrementContacts();
+            contactInfo.setLastEncounterTime(System.currentTimeMillis());
+        } else {
+            encounteredNodes.put(encounteredId, new ContactInfo(System.currentTimeMillis()));
+        }
+
         onEndpointConnected(endpoint);
     }
 
     private void disconnectedFromEndpoint(Endpoint endpoint) {
         Log.i("[NEARBY]", String.format("disconnectedFromEndpoint(endpoint=%s)", endpoint));
 
-        mEstablishedConnections.remove(endpoint.getId());
+        mHistoryExchangeConnections.remove(endpoint.getId());
         onEndpointDisconnected(endpoint);
     }
 
@@ -400,6 +490,40 @@ public class DisseminationService extends Service {
     protected void onEndpointConnected(@NotNull Endpoint endpoint) {
         Toast.makeText(this, "Connected: " + endpoint.getName(), Toast.LENGTH_SHORT).show();
         setState(State.CONNECTED);
+
+        // this is the first message when someone connected to us
+        // compose HistoryPayload
+        Map<Long, Contact> encounters = new HashMap<>();
+
+        for (Map.Entry<Long, ContactInfo> entry : encounteredNodes.entrySet()) {
+            encounters.put(
+                entry.getKey(),
+                Contact.newBuilder()
+                    .setContacts(entry.getValue().getContacts())
+                    .setDuration(entry.getValue().getDuration())
+                    .setLastEncounterTime(entry.getValue().getLastEncounterTime())
+                    .build());
+        }
+
+        History history = History.newBuilder()
+                .setSocialNetwork(SocialNetwork.newBuilder().addAllUserId(socialNetwork).build())
+                .setInterests(Interests.newBuilder().addAllInterest(interests).build())
+                .setEncounteredNodes(EncounteredNodes.newBuilder().putAllEncounters(encounters).build())
+                .build();
+
+        send(Payload.fromBytes(history.toByteArray()), endpoint.getId());
+
+
+        // send messages
+        for (Message message : messages) {
+            send(Payload.fromBytes(MessageExch.newBuilder()
+                    .setSource(message.getSource())
+                    .setTimestamp(message.getTimestamp())
+                    .setTopic1(message.getTopic1())
+                    .setTopic2(message.getTopic2())
+                    .setTopic3(message.getTopic3())
+                    .build().toByteArray()), endpoint.getId());
+        }
     }
 
     /** Called when someone has disconnected. */
@@ -414,7 +538,7 @@ public class DisseminationService extends Service {
      * @param payload The data you want to send.
      */
     protected void send(Payload payload) {
-        send(payload, mEstablishedConnections.keySet());
+        send(payload, mHistoryExchangeConnections.keySet());
     }
 
     private void send(Payload payload, Set<String> endpoints) {
@@ -423,38 +547,189 @@ public class DisseminationService extends Service {
             .addOnFailureListener(e -> Log.w("[NEARBY]", "sendPayload() failed.", e));
     }
 
+    private void send(Payload payload, String endpoint) {
+        mConnectionsClient.sendPayload(endpoint, payload)
+                .addOnFailureListener(e -> Log.w("[NEARBY]", "sendPayload() failed.", e));
+    }
+
     /**
-     * Someone connected to us has sent us data.
+     * Someone connected to us has sent us their history.
      *
      * @param endpoint The sender.
      * @param payload The data.
      */
-    protected void onReceive(Endpoint endpoint, Payload payload) {
+    protected void onReceiveHistory(@NotNull Endpoint endpoint, @NotNull Payload payload) {
+        Log.d("[NEARBY]", "Endpoint " + endpoint.getId() + " sent us their history.");
+        if (payload.getType() == Payload.Type.BYTES) {
+            try {
+                History history = History.parseFrom(payload.asBytes());
+                // compute aggregation weight
+                Pair<Double, Double> utility = computeAggregationWeight(
+                                                    history,
+                                                    Long.parseLong(endpoint.getId()));
+
+                double aggregationWeight;
+                if (utility == null) {
+                    aggregationWeight = 0;
+                } else {
+                    aggregationWeight = utility.second;
+
+                    // aggregate social network
+                    aggregateSocialNetwork(history.getSocialNetwork().getUserIdList(), aggregationWeight);
+                    // aggregate interests
+                    aggregateInterests(history.getInterests().getInterestList(), aggregationWeight);
+                }
+
+                // aggregate contacts - only one that can be modified when weight = 0
+                aggregateEncounteredNodes(history.getEncounteredNodes().getEncountersMap(), aggregationWeight);
+
+                // if there are no common topics, no need to exchange data
+                if (utility != null && utility.first == 0) {
+                    disconnect(endpoint);
+                }
+
+            } catch (InvalidProtocolBufferException e) {
+                Log.w("[NEARBY]", "Invalid payload from endpoint " + endpoint.getId());
+                disconnect(endpoint);
+            }
+        }
+    }
+
+    @Contract(pure = true)
+    private double getCommonNeighbours(@NotNull List<Long> encounteredSocialNetwork) {
+        double neighbours = 0;
+
+        for (Long node : encounteredSocialNetwork) {
+            if (socialNetwork.contains(node)) {
+                neighbours += 1;
+            }
+        }
+
+        return neighbours;
+    }
+
+    @Contract(pure = true)
+    private double getCommonInterest(@NotNull List<Integer> encounteredInterests) {
+        double friendship = 0;
+
+        for (Integer interest : encounteredInterests) {
+            if (interests.contains(interest)) {
+                friendship += 1;
+            }
+        }
+
+        return friendship;
+    }
+
+    // TODO add javadoc :)
+    @org.jetbrains.annotations.Nullable
+    private Pair<Double, Double> computeAggregationWeight(@NotNull History history, Long endpointId) {
+        if (encounters < contactsThreshold) {
+            return null;
+        }
+
+        // 1) similarity (number of common neighbours between individuals on social networks)
+        double nodeSimilarity = getCommonNeighbours(history.getSocialNetwork().getUserIdList());
+        if (maxSimilarity < nodeSimilarity) {
+            maxSimilarity = nodeSimilarity;
+        }
+        nodeSimilarity = maxSimilarity == 0 ? 0 : nodeSimilarity / maxSimilarity;
+
+        // 2) friendship (common interests)
+        double nodeFriendship = getCommonInterest(history.getInterests().getInterestList());
+        if(maxFriendship < nodeFriendship) {
+            maxFriendship = nodeFriendship;
+        }
+        nodeFriendship = maxFriendship == 0 ? 0 : nodeFriendship / maxFriendship;
+
+        // 3) connectivity (whether nodes are social network friends);
+        double connectivity = socialNetwork.contains(endpointId) ? 1.0 : 0.0;
+
+        // 4) number of contacts between the two nodes
+        double nodeContacts = Objects.requireNonNull(encounteredNodes.get(endpointId)).getContacts();
+        if (maxContacts < nodeContacts) {
+            maxContacts = nodeContacts;
+        }
+        nodeContacts = maxContacts == 0 ? 0 : nodeContacts / maxContacts;
+
+        return new Pair<>(
+                nodeFriendship, // so that if there aren't enough common interests, disconnectFromEndpoint
+                w1 * nodeSimilarity + w2 * nodeFriendship + w3 * connectivity + w4 * nodeContacts);
+    }
+
+    // TODO add javadoc :)
+    private void aggregateSocialNetwork(List<Long> encounteredSocialNetwork, double aggregationWeight) {
+        if (aggregationWeight > socialNetworkThreshold) {
+            socialNetwork.addAll(encounteredSocialNetwork);
+        }
+    }
+
+    // TODO add javadoc :)
+    private void aggregateInterests(List<Integer> encounteredInterests, double aggregationWeight) {
+        if (aggregationWeight > interestThreshold) {
+            interests.addAll(encounteredInterests);
+        }
+    }
+
+    // TODO add javadoc :)
+    private void aggregateEncounteredNodes(@NotNull Map<Long, Contact> encounteredEN, double aggregationWeight) {
+        for (Map.Entry<Long, Contact> e : encounteredEN.entrySet()) {
+            // we've already met this node
+            if (encounteredNodes.containsKey(e.getKey())) {
+                ContactInfo contactInfo = encounteredNodes.get(e.getKey());
+
+                if (contactInfo != null) {
+                    contactInfo.setContacts(
+                        (int) Math.max(
+                                        contactInfo.getContacts(),
+                                        aggregationWeight * e.getValue().getContacts()));
+
+                    contactInfo.setDuration(
+                            (long) Math.max(
+                                    contactInfo.getDuration(),
+                                    aggregationWeight * e.getValue().getDuration()));
+
+                    contactInfo.setLastEncounterTime(
+                        (long) Math.max(
+                                        contactInfo.getLastEncounterTime(),
+                                        aggregationWeight * e.getValue().getLastEncounterTime()));
+
+                    encounteredNodes.put(e.getKey(), contactInfo);
+                }
+
+            // this is a new node
+            } else {
+                ContactInfo contactInfo = new ContactInfo(
+                        (int) aggregationWeight * e.getValue().getContacts(),
+                        (long) aggregationWeight * e.getValue().getDuration(),
+                        (long) aggregationWeight * e.getValue().getLastEncounterTime()
+                );
+
+                encounteredNodes.put(e.getKey(), contactInfo);
+            }
+        }
+    }
+
+    /**
+     * Someone connected to us has sent us one of their messages.
+     *
+     * @param endpoint The sender.
+     * @param payload The data.
+     */
+    protected void onReceiveMessage(Endpoint endpoint, @NotNull Payload payload) {
         // TODO aici adaug mesajul in baza de date si in lista utilizatorului
-//        if (payload.getType() == Payload.Type.STREAM) {
-//            if (mAudioPlayer != null) {
-//                mAudioPlayer.stop();
-//                mAudioPlayer = null;
-//            }
-//
-//            AudioPlayer player =
-//                    new AudioPlayer(payload.asStream().asInputStream()) {
-//                        @WorkerThread
-//                        @Override
-//                        protected void onFinish() {
-//                            runOnUiThread(
-//                                    new Runnable() {
-//                                        @UiThread
-//                                        @Override
-//                                        public void run() {
-//                                            mAudioPlayer = null;
-//                                        }
-//                                    });
-//                        }
-//                    };
-//            mAudioPlayer = player;
-//            player.start();
-//        }
+
+        if (payload.getType() == Payload.Type.BYTES) {
+            try {
+                MessageExch message = MessageExch.parseFrom(payload.asBytes());
+
+                // TODO aici adaug mesajul in baza de date si in lista utilizatorului
+
+            } catch (InvalidProtocolBufferException e) {
+                Log.w("[NEARBY]", "Invalid payload from endpoint " + endpoint.getId());
+                disconnect(endpoint);
+            }
+        }
     }
 
     /**
@@ -483,7 +758,7 @@ public class DisseminationService extends Service {
      * State has changed.
      *
      * @param oldState The previous state we were in. Clean up anything related to this state.
-     * @param newState The new state we're now in. Prepare the UI for this state.
+     * @param newState The new state we're now in.
      */
     private void onStateChanged(State oldState, @NotNull State newState) {
         // Update Nearby Connections to the new state.
@@ -535,7 +810,7 @@ public class DisseminationService extends Service {
 
     /** Returns a list of currently connected endpoints. */
     protected Set<Endpoint> getConnectedEndpoints() {
-        return new HashSet<>(mEstablishedConnections.values());
+        return new HashSet<>(mHistoryExchangeConnections.values());
     }
 
     /**

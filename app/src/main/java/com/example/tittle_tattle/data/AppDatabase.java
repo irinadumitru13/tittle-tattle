@@ -50,7 +50,7 @@ public abstract class AppDatabase extends RoomDatabase {
         return Room.databaseBuilder(context, AppDatabase.class, db_name).build();
     }
 
-    public User findUserById(String user_id) {
+    public User findUserById(long user_id) {
          return database.userDAO().findUserById(user_id);
     }
 
@@ -62,7 +62,7 @@ public abstract class AppDatabase extends RoomDatabase {
         database.subscriptionDAO().insert(subscription);
     }
 
-    public void unsubscribe(int subscription_id, String user_id) {
+    public void unsubscribe(int subscription_id, long user_id) {
         database.subscriptionDAO().delete(subscription_id, user_id);
     }
 

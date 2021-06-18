@@ -14,7 +14,7 @@ public class Message {
     private Integer id;
 
     @NonNull
-    private final String source;
+    private final Long source;
 
     @NonNull
     private final String content;
@@ -30,7 +30,7 @@ public class Message {
     private final Long timestamp;
 
     @Ignore
-    public Message(@NonNull String source,
+    public Message(@NonNull Long source,
                    @NonNull String content,
                    @NonNull Integer topic1,
                    @Nullable Integer topic2,
@@ -43,7 +43,7 @@ public class Message {
         this.timestamp = System.currentTimeMillis();
     }
 
-    public Message(@NonNull String source,
+    public Message(@NonNull Long source,
                    @NonNull String content,
                    @NonNull Integer topic1,
                    @Nullable Integer topic2,
@@ -66,7 +66,7 @@ public class Message {
     }
 
     @NonNull
-    public String getSource() {
+    public Long getSource() {
         return source;
     }
 

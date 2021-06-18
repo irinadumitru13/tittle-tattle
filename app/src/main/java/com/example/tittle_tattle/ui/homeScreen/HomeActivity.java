@@ -36,10 +36,6 @@ public class HomeActivity extends AppCompatActivity {
 //        int uiOptions = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 //        decorView.setSystemUiVisibility(uiOptions);
 
-        // start service for dissemination
-//        Intent intentService = new Intent(this, DisseminationService.class);
-//        startService(intentService);
-
         Intent intent = getIntent();
         String serializedAccessToken = intent.getStringExtra("access_token");
         AccessToken accessToken = new Gson().fromJson(serializedAccessToken, AccessToken.class);

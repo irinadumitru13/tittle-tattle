@@ -122,7 +122,7 @@ public class SharedViewModel extends AndroidViewModel {
 
         @Override
         protected User doInBackground(Void... voids) {
-            return database.findUserById(getAccessToken().getUserId());
+            return database.findUserById(Long.parseLong(getAccessToken().getUserId()));
         }
 
         @Override
@@ -143,7 +143,7 @@ public class SharedViewModel extends AndroidViewModel {
                                     AsyncTask.execute(() -> {
                                         try {
                                             database.insertUser(
-                                                    new User(accessToken.getUserId(),
+                                                    new User(Long.parseLong(accessToken.getUserId()),
                                                             responseJson.get("name").toString()));
                                         } catch (JSONException e) {
                                             e.printStackTrace();
@@ -158,12 +158,12 @@ public class SharedViewModel extends AndroidViewModel {
             }
 
             ISUser.getUser().setFullName(state.get("full_name"));
-            ISUser.getUser().setId(accessToken.getUserId());
+            ISUser.getUser().setId(Long.parseLong(accessToken.getUserId()));
         }
     }
 
     public void updateSubscriptions() {
-        new CompositeDisposable().add(database.subscriptionDAO().findAllByUserId(getAccessToken().getUserId())
+        new CompositeDisposable().add(database.subscriptionDAO().findAllByUserId(Long.parseLong(getAccessToken().getUserId()))
                 .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.computation())
         .subscribe(subscriptions -> {
@@ -178,6 +178,6 @@ public class SharedViewModel extends AndroidViewModel {
     }
 
     public Observable<List<Subscription>> getSubscriptions() {
-        return database.subscriptionDAO().findAllByUserId(getAccessToken().getUserId()).toObservable();
+        return database.subscriptionDAO().findAllByUserId(Long.parseLong(getAccessToken().getUserId())).toObservable();
     }
 }

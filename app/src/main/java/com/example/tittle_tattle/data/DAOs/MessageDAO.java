@@ -19,7 +19,7 @@ public interface MessageDAO {
     void deleteById(int id);
 
     @Query("SELECT * FROM messages WHERE source = :user_id")
-    Single<List<Message>> findAllByUserId(String user_id);
+    Single<List<Message>> findAllByUserId(long user_id);
 
     @Query("SELECT * FROM messages")
     Single<List<Message>> findAll();

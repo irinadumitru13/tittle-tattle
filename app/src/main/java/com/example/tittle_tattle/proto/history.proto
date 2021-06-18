@@ -7,12 +7,16 @@ option optimize_for = SPEED;
 
 message History {
   SocialNetwork socialNetwork = 1;
-  Interests interests = 2;
+  EncounteredInterests encounteredInterests = 2;
   EncounteredNodes encounteredNodes = 3;
 }
 
 message SocialNetwork {
-  repeated int64 userId = 1;
+  map<int64, Interests> node = 1;
+}
+
+message EncounteredInterests {
+  map<int32, int64> interests = 1;
 }
 
 message Interests {

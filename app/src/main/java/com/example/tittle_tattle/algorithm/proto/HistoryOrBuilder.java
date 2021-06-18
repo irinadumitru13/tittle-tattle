@@ -23,19 +23,19 @@ public interface HistoryOrBuilder extends
   com.example.tittle_tattle.algorithm.proto.SocialNetworkOrBuilder getSocialNetworkOrBuilder();
 
   /**
-   * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
-   * @return Whether the interests field is set.
+   * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
+   * @return Whether the encounteredInterests field is set.
    */
-  boolean hasInterests();
+  boolean hasEncounteredInterests();
   /**
-   * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
-   * @return The interests.
+   * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
+   * @return The encounteredInterests.
    */
-  com.example.tittle_tattle.algorithm.proto.Interests getInterests();
+  com.example.tittle_tattle.algorithm.proto.EncounteredInterests getEncounteredInterests();
   /**
-   * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+   * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
    */
-  com.example.tittle_tattle.algorithm.proto.InterestsOrBuilder getInterestsOrBuilder();
+  com.example.tittle_tattle.algorithm.proto.EncounteredInterestsOrBuilder getEncounteredInterestsOrBuilder();
 
   /**
    * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredNodes encounteredNodes = 3;</code>

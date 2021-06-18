@@ -62,14 +62,14 @@ private static final long serialVersionUID = 0L;
             break;
           }
           case 18: {
-            com.example.tittle_tattle.algorithm.proto.Interests.Builder subBuilder = null;
-            if (interests_ != null) {
-              subBuilder = interests_.toBuilder();
+            com.example.tittle_tattle.algorithm.proto.EncounteredInterests.Builder subBuilder = null;
+            if (encounteredInterests_ != null) {
+              subBuilder = encounteredInterests_.toBuilder();
             }
-            interests_ = input.readMessage(com.example.tittle_tattle.algorithm.proto.Interests.parser(), extensionRegistry);
+            encounteredInterests_ = input.readMessage(com.example.tittle_tattle.algorithm.proto.EncounteredInterests.parser(), extensionRegistry);
             if (subBuilder != null) {
-              subBuilder.mergeFrom(interests_);
-              interests_ = subBuilder.buildPartial();
+              subBuilder.mergeFrom(encounteredInterests_);
+              encounteredInterests_ = subBuilder.buildPartial();
             }
 
             break;
@@ -145,30 +145,30 @@ private static final long serialVersionUID = 0L;
     return getSocialNetwork();
   }
 
-  public static final int INTERESTS_FIELD_NUMBER = 2;
-  private com.example.tittle_tattle.algorithm.proto.Interests interests_;
+  public static final int ENCOUNTEREDINTERESTS_FIELD_NUMBER = 2;
+  private com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests_;
   /**
-   * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
-   * @return Whether the interests field is set.
+   * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
+   * @return Whether the encounteredInterests field is set.
    */
   @java.lang.Override
-  public boolean hasInterests() {
-    return interests_ != null;
+  public boolean hasEncounteredInterests() {
+    return encounteredInterests_ != null;
   }
   /**
-   * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
-   * @return The interests.
+   * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
+   * @return The encounteredInterests.
    */
   @java.lang.Override
-  public com.example.tittle_tattle.algorithm.proto.Interests getInterests() {
-    return interests_ == null ? com.example.tittle_tattle.algorithm.proto.Interests.getDefaultInstance() : interests_;
+  public com.example.tittle_tattle.algorithm.proto.EncounteredInterests getEncounteredInterests() {
+    return encounteredInterests_ == null ? com.example.tittle_tattle.algorithm.proto.EncounteredInterests.getDefaultInstance() : encounteredInterests_;
   }
   /**
-   * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+   * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
    */
   @java.lang.Override
-  public com.example.tittle_tattle.algorithm.proto.InterestsOrBuilder getInterestsOrBuilder() {
-    return getInterests();
+  public com.example.tittle_tattle.algorithm.proto.EncounteredInterestsOrBuilder getEncounteredInterestsOrBuilder() {
+    return getEncounteredInterests();
   }
 
   public static final int ENCOUNTEREDNODES_FIELD_NUMBER = 3;
@@ -214,8 +214,8 @@ private static final long serialVersionUID = 0L;
     if (socialNetwork_ != null) {
       output.writeMessage(1, getSocialNetwork());
     }
-    if (interests_ != null) {
-      output.writeMessage(2, getInterests());
+    if (encounteredInterests_ != null) {
+      output.writeMessage(2, getEncounteredInterests());
     }
     if (encounteredNodes_ != null) {
       output.writeMessage(3, getEncounteredNodes());
@@ -233,9 +233,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(1, getSocialNetwork());
     }
-    if (interests_ != null) {
+    if (encounteredInterests_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(2, getInterests());
+        .computeMessageSize(2, getEncounteredInterests());
     }
     if (encounteredNodes_ != null) {
       size += com.google.protobuf.CodedOutputStream
@@ -261,10 +261,10 @@ private static final long serialVersionUID = 0L;
       if (!getSocialNetwork()
           .equals(other.getSocialNetwork())) return false;
     }
-    if (hasInterests() != other.hasInterests()) return false;
-    if (hasInterests()) {
-      if (!getInterests()
-          .equals(other.getInterests())) return false;
+    if (hasEncounteredInterests() != other.hasEncounteredInterests()) return false;
+    if (hasEncounteredInterests()) {
+      if (!getEncounteredInterests()
+          .equals(other.getEncounteredInterests())) return false;
     }
     if (hasEncounteredNodes() != other.hasEncounteredNodes()) return false;
     if (hasEncounteredNodes()) {
@@ -286,9 +286,9 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + SOCIALNETWORK_FIELD_NUMBER;
       hash = (53 * hash) + getSocialNetwork().hashCode();
     }
-    if (hasInterests()) {
-      hash = (37 * hash) + INTERESTS_FIELD_NUMBER;
-      hash = (53 * hash) + getInterests().hashCode();
+    if (hasEncounteredInterests()) {
+      hash = (37 * hash) + ENCOUNTEREDINTERESTS_FIELD_NUMBER;
+      hash = (53 * hash) + getEncounteredInterests().hashCode();
     }
     if (hasEncounteredNodes()) {
       hash = (37 * hash) + ENCOUNTEREDNODES_FIELD_NUMBER;
@@ -433,11 +433,11 @@ private static final long serialVersionUID = 0L;
         socialNetwork_ = null;
         socialNetworkBuilder_ = null;
       }
-      if (interestsBuilder_ == null) {
-        interests_ = null;
+      if (encounteredInterestsBuilder_ == null) {
+        encounteredInterests_ = null;
       } else {
-        interests_ = null;
-        interestsBuilder_ = null;
+        encounteredInterests_ = null;
+        encounteredInterestsBuilder_ = null;
       }
       if (encounteredNodesBuilder_ == null) {
         encounteredNodes_ = null;
@@ -476,10 +476,10 @@ private static final long serialVersionUID = 0L;
       } else {
         result.socialNetwork_ = socialNetworkBuilder_.build();
       }
-      if (interestsBuilder_ == null) {
-        result.interests_ = interests_;
+      if (encounteredInterestsBuilder_ == null) {
+        result.encounteredInterests_ = encounteredInterests_;
       } else {
-        result.interests_ = interestsBuilder_.build();
+        result.encounteredInterests_ = encounteredInterestsBuilder_.build();
       }
       if (encounteredNodesBuilder_ == null) {
         result.encounteredNodes_ = encounteredNodes_;
@@ -537,8 +537,8 @@ private static final long serialVersionUID = 0L;
       if (other.hasSocialNetwork()) {
         mergeSocialNetwork(other.getSocialNetwork());
       }
-      if (other.hasInterests()) {
-        mergeInterests(other.getInterests());
+      if (other.hasEncounteredInterests()) {
+        mergeEncounteredInterests(other.getEncounteredInterests());
       }
       if (other.hasEncounteredNodes()) {
         mergeEncounteredNodes(other.getEncounteredNodes());
@@ -691,123 +691,123 @@ private static final long serialVersionUID = 0L;
       return socialNetworkBuilder_;
     }
 
-    private com.example.tittle_tattle.algorithm.proto.Interests interests_;
+    private com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.example.tittle_tattle.algorithm.proto.Interests, com.example.tittle_tattle.algorithm.proto.Interests.Builder, com.example.tittle_tattle.algorithm.proto.InterestsOrBuilder> interestsBuilder_;
+        com.example.tittle_tattle.algorithm.proto.EncounteredInterests, com.example.tittle_tattle.algorithm.proto.EncounteredInterests.Builder, com.example.tittle_tattle.algorithm.proto.EncounteredInterestsOrBuilder> encounteredInterestsBuilder_;
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
-     * @return Whether the interests field is set.
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
+     * @return Whether the encounteredInterests field is set.
      */
-    public boolean hasInterests() {
-      return interestsBuilder_ != null || interests_ != null;
+    public boolean hasEncounteredInterests() {
+      return encounteredInterestsBuilder_ != null || encounteredInterests_ != null;
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
-     * @return The interests.
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
+     * @return The encounteredInterests.
      */
-    public com.example.tittle_tattle.algorithm.proto.Interests getInterests() {
-      if (interestsBuilder_ == null) {
-        return interests_ == null ? com.example.tittle_tattle.algorithm.proto.Interests.getDefaultInstance() : interests_;
+    public com.example.tittle_tattle.algorithm.proto.EncounteredInterests getEncounteredInterests() {
+      if (encounteredInterestsBuilder_ == null) {
+        return encounteredInterests_ == null ? com.example.tittle_tattle.algorithm.proto.EncounteredInterests.getDefaultInstance() : encounteredInterests_;
       } else {
-        return interestsBuilder_.getMessage();
+        return encounteredInterestsBuilder_.getMessage();
       }
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
-    public Builder setInterests(com.example.tittle_tattle.algorithm.proto.Interests value) {
-      if (interestsBuilder_ == null) {
+    public Builder setEncounteredInterests(com.example.tittle_tattle.algorithm.proto.EncounteredInterests value) {
+      if (encounteredInterestsBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        interests_ = value;
+        encounteredInterests_ = value;
         onChanged();
       } else {
-        interestsBuilder_.setMessage(value);
+        encounteredInterestsBuilder_.setMessage(value);
       }
 
       return this;
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
-    public Builder setInterests(
-        com.example.tittle_tattle.algorithm.proto.Interests.Builder builderForValue) {
-      if (interestsBuilder_ == null) {
-        interests_ = builderForValue.build();
+    public Builder setEncounteredInterests(
+        com.example.tittle_tattle.algorithm.proto.EncounteredInterests.Builder builderForValue) {
+      if (encounteredInterestsBuilder_ == null) {
+        encounteredInterests_ = builderForValue.build();
         onChanged();
       } else {
-        interestsBuilder_.setMessage(builderForValue.build());
+        encounteredInterestsBuilder_.setMessage(builderForValue.build());
       }
 
       return this;
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
-    public Builder mergeInterests(com.example.tittle_tattle.algorithm.proto.Interests value) {
-      if (interestsBuilder_ == null) {
-        if (interests_ != null) {
-          interests_ =
-            com.example.tittle_tattle.algorithm.proto.Interests.newBuilder(interests_).mergeFrom(value).buildPartial();
+    public Builder mergeEncounteredInterests(com.example.tittle_tattle.algorithm.proto.EncounteredInterests value) {
+      if (encounteredInterestsBuilder_ == null) {
+        if (encounteredInterests_ != null) {
+          encounteredInterests_ =
+            com.example.tittle_tattle.algorithm.proto.EncounteredInterests.newBuilder(encounteredInterests_).mergeFrom(value).buildPartial();
         } else {
-          interests_ = value;
+          encounteredInterests_ = value;
         }
         onChanged();
       } else {
-        interestsBuilder_.mergeFrom(value);
+        encounteredInterestsBuilder_.mergeFrom(value);
       }
 
       return this;
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
-    public Builder clearInterests() {
-      if (interestsBuilder_ == null) {
-        interests_ = null;
+    public Builder clearEncounteredInterests() {
+      if (encounteredInterestsBuilder_ == null) {
+        encounteredInterests_ = null;
         onChanged();
       } else {
-        interests_ = null;
-        interestsBuilder_ = null;
+        encounteredInterests_ = null;
+        encounteredInterestsBuilder_ = null;
       }
 
       return this;
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
-    public com.example.tittle_tattle.algorithm.proto.Interests.Builder getInterestsBuilder() {
+    public com.example.tittle_tattle.algorithm.proto.EncounteredInterests.Builder getEncounteredInterestsBuilder() {
       
       onChanged();
-      return getInterestsFieldBuilder().getBuilder();
+      return getEncounteredInterestsFieldBuilder().getBuilder();
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
-    public com.example.tittle_tattle.algorithm.proto.InterestsOrBuilder getInterestsOrBuilder() {
-      if (interestsBuilder_ != null) {
-        return interestsBuilder_.getMessageOrBuilder();
+    public com.example.tittle_tattle.algorithm.proto.EncounteredInterestsOrBuilder getEncounteredInterestsOrBuilder() {
+      if (encounteredInterestsBuilder_ != null) {
+        return encounteredInterestsBuilder_.getMessageOrBuilder();
       } else {
-        return interests_ == null ?
-            com.example.tittle_tattle.algorithm.proto.Interests.getDefaultInstance() : interests_;
+        return encounteredInterests_ == null ?
+            com.example.tittle_tattle.algorithm.proto.EncounteredInterests.getDefaultInstance() : encounteredInterests_;
       }
     }
     /**
-     * <code>.com.example.tittle_tattle.algorithm.proto.Interests interests = 2;</code>
+     * <code>.com.example.tittle_tattle.algorithm.proto.EncounteredInterests encounteredInterests = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        com.example.tittle_tattle.algorithm.proto.Interests, com.example.tittle_tattle.algorithm.proto.Interests.Builder, com.example.tittle_tattle.algorithm.proto.InterestsOrBuilder> 
-        getInterestsFieldBuilder() {
-      if (interestsBuilder_ == null) {
-        interestsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            com.example.tittle_tattle.algorithm.proto.Interests, com.example.tittle_tattle.algorithm.proto.Interests.Builder, com.example.tittle_tattle.algorithm.proto.InterestsOrBuilder>(
-                getInterests(),
+        com.example.tittle_tattle.algorithm.proto.EncounteredInterests, com.example.tittle_tattle.algorithm.proto.EncounteredInterests.Builder, com.example.tittle_tattle.algorithm.proto.EncounteredInterestsOrBuilder> 
+        getEncounteredInterestsFieldBuilder() {
+      if (encounteredInterestsBuilder_ == null) {
+        encounteredInterestsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            com.example.tittle_tattle.algorithm.proto.EncounteredInterests, com.example.tittle_tattle.algorithm.proto.EncounteredInterests.Builder, com.example.tittle_tattle.algorithm.proto.EncounteredInterestsOrBuilder>(
+                getEncounteredInterests(),
                 getParentForChildren(),
                 isClean());
-        interests_ = null;
+        encounteredInterests_ = null;
       }
-      return interestsBuilder_;
+      return encounteredInterestsBuilder_;
     }
 
     private com.example.tittle_tattle.algorithm.proto.EncounteredNodes encounteredNodes_;

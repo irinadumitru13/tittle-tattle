@@ -1,10 +1,13 @@
-package com.example.tittle_tattle.algorithm;
+package com.example.tittle_tattle.data.models;
+
+import androidx.room.Ignore;
 
 public class ContactInfo {
     private int contacts;
     private long duration;
     private long lastEncounterTime;
 
+    @Ignore
     public ContactInfo(long lastEncounterTime) {
         this.contacts = 1;
         this.duration = 0;

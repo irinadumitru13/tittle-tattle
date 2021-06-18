@@ -81,14 +81,8 @@ public class TopicsFragment extends Fragment {
         requestPermission();
 
         // start service for dissemination
-        Thread t = new Thread() {
-            public void run() {
-                Intent intentService = new Intent(getActivity(), DisseminationService.class);
-                requireActivity().startService(intentService);
-            }
-        };
-
-        t.start();
+        Intent intentService = new Intent(getActivity(), DisseminationService.class);
+        requireActivity().startForegroundService(intentService);
     }
 
     @Override

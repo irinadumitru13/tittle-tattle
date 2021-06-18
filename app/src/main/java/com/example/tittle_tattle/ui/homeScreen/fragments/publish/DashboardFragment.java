@@ -22,7 +22,7 @@ import androidx.navigation.Navigation;
 import com.example.tittle_tattle.R;
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
-import com.example.tittle_tattle.data.models.Message;
+import com.example.tittle_tattle.data.models.MessageObject;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.databinding.FragmentDashboardBinding;
 import com.example.tittle_tattle.ui.homeScreen.SharedViewModel;
@@ -119,7 +119,7 @@ public class DashboardFragment extends Fragment {
                         Log.i("[DB]", "publish message");
 
                         AppDatabase.getInstance(view.getContext()).publishMessage(
-                                new Message(
+                                new MessageObject(
                                         ISUser.getUser().getId(),
                                         content,
                                         topics.get(0),

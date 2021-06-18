@@ -8,19 +8,36 @@ public interface SocialNetworkOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>repeated int64 userId = 1;</code>
-   * @return A list containing the userId.
+   * <code>map&lt;int64, .com.example.tittle_tattle.algorithm.proto.Interests&gt; node = 1;</code>
    */
-  java.util.List<java.lang.Long> getUserIdList();
+  int getNodeCount();
   /**
-   * <code>repeated int64 userId = 1;</code>
-   * @return The count of userId.
+   * <code>map&lt;int64, .com.example.tittle_tattle.algorithm.proto.Interests&gt; node = 1;</code>
    */
-  int getUserIdCount();
+  boolean containsNode(
+      long key);
   /**
-   * <code>repeated int64 userId = 1;</code>
-   * @param index The index of the element to return.
-   * @return The userId at the given index.
+   * Use {@link #getNodeMap()} instead.
    */
-  long getUserId(int index);
+  @java.lang.Deprecated
+  java.util.Map<java.lang.Long, com.example.tittle_tattle.algorithm.proto.Interests>
+  getNode();
+  /**
+   * <code>map&lt;int64, .com.example.tittle_tattle.algorithm.proto.Interests&gt; node = 1;</code>
+   */
+  java.util.Map<java.lang.Long, com.example.tittle_tattle.algorithm.proto.Interests>
+  getNodeMap();
+  /**
+   * <code>map&lt;int64, .com.example.tittle_tattle.algorithm.proto.Interests&gt; node = 1;</code>
+   */
+
+  com.example.tittle_tattle.algorithm.proto.Interests getNodeOrDefault(
+      long key,
+      com.example.tittle_tattle.algorithm.proto.Interests defaultValue);
+  /**
+   * <code>map&lt;int64, .com.example.tittle_tattle.algorithm.proto.Interests&gt; node = 1;</code>
+   */
+
+  com.example.tittle_tattle.algorithm.proto.Interests getNodeOrThrow(
+      long key);
 }

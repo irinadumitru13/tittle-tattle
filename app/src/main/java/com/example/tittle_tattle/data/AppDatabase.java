@@ -6,10 +6,16 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
+import com.example.tittle_tattle.data.DAOs.EncounteredInterestsDAO;
+import com.example.tittle_tattle.data.DAOs.EncounteredNodesDAO;
 import com.example.tittle_tattle.data.DAOs.MessageDAO;
+import com.example.tittle_tattle.data.DAOs.SocialNetworkDAO;
 import com.example.tittle_tattle.data.DAOs.SubscriptionDAO;
 import com.example.tittle_tattle.data.DAOs.UserDAO;
-import com.example.tittle_tattle.data.models.Message;
+import com.example.tittle_tattle.data.models.EncounteredInterestsObject;
+import com.example.tittle_tattle.data.models.EncounteredNodesObject;
+import com.example.tittle_tattle.data.models.MessageObject;
+import com.example.tittle_tattle.data.models.SocialNetworkObject;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.data.models.User;
 
@@ -18,7 +24,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Database(entities = {User.class, Subscription.class, Message.class}, version = 1)
+@Database(entities = {
+        User.class,
+        Subscription.class,
+        MessageObject.class,
+        EncounteredInterestsObject.class,
+        EncounteredNodesObject.class,
+        SocialNetworkObject.class
+        }, version = 1)
 public abstract class AppDatabase extends RoomDatabase {
     private static final String db_name = "tittle_tattle";
     private static final int NUMBER_OF_THREADS = 4;
@@ -30,6 +43,12 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SubscriptionDAO subscriptionDAO();
 
     public abstract MessageDAO messageDAO();
+
+    public abstract EncounteredInterestsDAO encounteredInterestsDAO();
+
+    public abstract EncounteredNodesDAO encounteredNodesDAO();
+
+    public abstract SocialNetworkDAO socialNetworkDAO();
 
     static final ExecutorService databaseWriteExecutor =
             Executors.newFixedThreadPool(NUMBER_OF_THREADS);
@@ -66,7 +85,7 @@ public abstract class AppDatabase extends RoomDatabase {
         database.subscriptionDAO().delete(subscription_id, user_id);
     }
 
-    public void publishMessage(Message message) {
+    public void publishMessage(MessageObject message) {
         database.messageDAO().insert(message);
     }
 }

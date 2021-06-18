@@ -1,8 +1,17 @@
 package com.example.tittle_tattle.algorithm;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Process;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
@@ -11,13 +20,17 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.example.tittle_tattle.R;
 import com.example.tittle_tattle.algorithm.proto.Contact;
+import com.example.tittle_tattle.algorithm.proto.EncounteredInterests;
 import com.example.tittle_tattle.algorithm.proto.EncounteredNodes;
 import com.example.tittle_tattle.algorithm.proto.History;
 import com.example.tittle_tattle.algorithm.proto.Interests;
 import com.example.tittle_tattle.algorithm.proto.MessageExch;
 import com.example.tittle_tattle.algorithm.proto.SocialNetwork;
-import com.example.tittle_tattle.data.models.Message;
+import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.ContactInfo;
+import com.example.tittle_tattle.data.models.MessageObject;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -41,7 +54,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -61,103 +74,124 @@ import java.util.Set;
  * down the volume keys and speaking into the phone. Advertising and discovery have both stopped.
  */
 public class DisseminationService extends Service {
+    private Looper serviceLooper;
+    private ServiceHandler serviceHandler;
+    /** Our handler to Nearby Connections. */
+    private ConnectionsClient mConnectionsClient;
+    /** The strategy we're going to use in the Nearby framework. */
     private static final Strategy STRATEGY = Strategy.P2P_CLUSTER;
+    /** The service ID of this service. */
     private static final String SERVICE_ID = "com.example.tittle_tattle.SERVICE_ID";
-
     /** The state of the app. As the app changes states, advertising/discovery will start/stop. */
     private State mState = State.UNKNOWN;
-
     /** A random UID used as this device's endpoint name. */
     private String mName;
 
-    /** Our handler to Nearby Connections. */
-    private ConnectionsClient mConnectionsClient;
-
-    /**
-     * True if we are asking a discovered device to connect to us. While we ask, we cannot ask another
-     * device.
-     */
+    /** True if we are asking a discovered device to connect to us. */
     private boolean mIsConnecting = false;
-
     /** True if we are discovering. */
     private boolean mIsDiscovering = false;
-
     /** True if we are advertising. */
     private boolean mIsAdvertising = false;
 
-    /** Normalization value for friendship. */
-    private double maxFriendship = Double.MIN_VALUE;
-
-    /** Normalization value for similarity. */
-    private double maxSimilarity = Double.MIN_VALUE;
-
-    /** Normalization value for contacts. */
-    private double maxContacts = Double.MIN_VALUE;
-
-    /** Aggregation weights. */
-    private final double w1 = 0.25, w2 = 0.25, w3 = 0.25, w4 = 0.25;
-
-    /** Social network threshold. */
-    private double socialNetworkThreshold;
-
-    /** Interest threshold. */
-    private double interestThreshold;
-
-    /** Contacts threshold. */
-    private int contactsThreshold;
-
-    /** How many contacts has this node made. */
-    private long encounters = 0;
-
     /** The devices we've discovered near us. */
     private final Map<String, Endpoint> mDiscoveredEndpoints = new HashMap<>();
-
     /**
      * The devices we have pending connections to. They will stay pending until we call {@link
      * #acceptConnection(Endpoint)} or {@link #rejectConnection(Endpoint)}.
      */
     private final Map<String, Endpoint> mPendingConnections = new HashMap<>();
-
     /**
      * The devices we are currently connected to. First interaction means history exchange.
      * For advertisers, this may be large. For discoverers, there will only be one entry in this map.
      */
     private final Map<String, Endpoint> mHistoryExchangeConnections = new HashMap<>();
-
     /**
      * The devices we are currently connected to. After history exchange, messages can be exchanged.
      * For advertisers, this may be large. For discoverers, there will only be one entry in this map.
      */
     private final Map<String, Endpoint> mMessageExchangeConnections = new HashMap<>();
 
+    /** Normalization value for friendship. */
+    private double maxFriendship = Double.MIN_VALUE;
+    /** Normalization value for similarity. */
+    private double maxSimilarity = Double.MIN_VALUE;
+    /** Normalization value for contacts. */
+    private double maxContacts = Double.MIN_VALUE;
+    /** Aggregation weights. */
+    private final double w1 = 0.25, w2 = 0.25, w3 = 0.25, w4 = 0.25;
+
+    /** Social network threshold. */
+    private double socialNetworkThreshold;
+    /** Interest threshold. */
+    private double interestThreshold;
+    /** Contacts threshold. */
+    private int contactsThreshold;
+    /** Interested friends threshold - for ONSIDE algorithm */
+    private int interestedFriendsThreshold;
+    /** Encountered interests threshold - for ONSIDE algorithm */
+    private double encounteredInterestsThreshold;
+
+    /** How many contacts has this node made. */
+    private long encounters = 0;
+
     /** List of nodes encountered by the current node during a time window. */
     private final Map<Long, ContactInfo> encounteredNodes = new HashMap<>();
-
-    /** Social network */
-    private final Set<Long> socialNetwork = new HashSet<>();
-
+    /** Social network - user id with their interests */
+    // TODO add me in my social network so that others would know what i m interested in
+    private final Map<Long, Set<Integer>> socialNetwork = new HashMap<>();
     /** Interests */
-    private final HashSet<Integer> interests = new HashSet<>();
-
+    private final Map<Integer, Long> encounteredInterests = new HashMap<>();
     /** Messages to be transmitted */
-    private final List<Message> messages = new LinkedList<>();
+    private Set<MessageObject> messages;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        startService();
         // TODO extract data from db
         Log.i("[NEARBY]", "Service onCreate()");
 
-        mName = String.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0));
+        HandlerThread thread = new HandlerThread("ServiceStartArguments",
+                Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
 
-        mConnectionsClient = Nearby.getConnectionsClient(this);
-        setState(State.SEARCHING);
+        serviceLooper = thread.getLooper();
+        serviceHandler = new ServiceHandler(serviceLooper);
+
+//        mName = String.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0));
+//
+//        mConnectionsClient = Nearby.getConnectionsClient(this);
+//        setState(State.SEARCHING);
+    }
+
+    private final class ServiceHandler extends Handler {
+        private final AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(@NotNull android.os.Message msg) {
+            messages = new LinkedHashSet<>(db.messageDAO().findAll());
+
+            Log.i("[MESSAGES]", String.valueOf(messages.size()));
+
+            mName = String.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0));
+
+            mConnectionsClient = Nearby.getConnectionsClient(getApplicationContext());
+            setState(State.SEARCHING);
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         Toast.makeText(this, "tittle-tattle service starting", Toast.LENGTH_SHORT).show();
+        android.os.Message message = serviceHandler.obtainMessage();
+        message.arg1 = startId;
+        serviceHandler.sendMessage(message);
 
         return START_STICKY;
     }
@@ -173,6 +207,33 @@ public class DisseminationService extends Service {
         super.onDestroy();
         Toast.makeText(this, "tittle-tattle service done", Toast.LENGTH_SHORT).show();
         // TODO put data in db
+        stopAllEndpoints();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("tittle-tattle", "tittle-tattle", NotificationManager.IMPORTANCE_LOW);
+            channel.setDescription("tittle-tattle notification channel");
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void startService() {
+        createNotificationChannel();
+        Intent notificationIntent = new Intent(this, DisseminationService.class);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        Notification notification =
+                new Notification.Builder(this, "tittle-tattle")
+                        .setContentTitle("tittle-tattle")
+                        .setContentText("Service is actively using Bluetooth and WiFi connections.")
+                        .setSmallIcon(R.drawable.ic_stat_name)
+                        .setContentIntent(pendingIntent)
+                        .build();
+        startForeground(1, notification);
     }
 
     /** Callbacks for connections to other devices. */
@@ -180,7 +241,7 @@ public class DisseminationService extends Service {
         new ConnectionLifecycleCallback() {
             @Override
             public void onConnectionInitiated(@NotNull String endpointId, @NotNull ConnectionInfo connectionInfo) {
-                Log.d("[NEARBY]", String.format("onConnectionInitiated(endpointId=%s, endpointName=%s)",
+                Log.i("[NEARBY]", String.format("onConnectionInitiated(endpointId=%s, endpointName=%s)",
                                                     endpointId, connectionInfo.getEndpointName()));
 
                 Endpoint endpoint = new Endpoint(endpointId, connectionInfo.getEndpointName());
@@ -191,8 +252,7 @@ public class DisseminationService extends Service {
 
             @Override
             public void onConnectionResult(@NotNull String endpointId, @NotNull ConnectionResolution result) {
-                Log.d("[NEARBY]", String.format("onConnectionResponse(endpointId=%s, result=%s)", endpointId, result));
-
+                Log.i("[NEARBY]", String.format("onConnectionResponse(endpointId=%s, result=%s)", endpointId, result));
                 // We're no longer connecting
                 mIsConnecting = false;
 
@@ -217,7 +277,7 @@ public class DisseminationService extends Service {
 
                 // TODO calculate duration with endpoint
                 // TODO see from where to delete
-                disconnectedFromEndpoint(mHistoryExchangeConnections.get(endpointId));
+                disconnectedFromEndpoint(endpointId);
             }
         };
 
@@ -289,9 +349,9 @@ public class DisseminationService extends Service {
             .addOnSuccessListener(unusedResult -> onAdvertisingStarted())
 
             .addOnFailureListener(e -> {
-                if (!Objects.equals(e.getMessage(), "8001: STATUS_ALREADY_ADVERTISING")) {
+//                if (!Objects.equals(e.getMessage(), "8001: STATUS_ALREADY_ADVERTISING")) {
                     onAdvertisingFailed(e);
-                }
+//                }
             });
     }
 
@@ -335,8 +395,7 @@ public class DisseminationService extends Service {
 
     /** Rejects a connection request. */
     protected void rejectConnection(@NotNull Endpoint endpoint) {
-        mConnectionsClient
-            .rejectConnection(endpoint.getId())
+        mConnectionsClient.rejectConnection(endpoint.getId())
             .addOnFailureListener(e -> Log.w("[NEARBY]", "rejectConnection() failed.", e));
     }
 
@@ -352,14 +411,12 @@ public class DisseminationService extends Service {
         DiscoveryOptions.Builder discoveryOptions = new DiscoveryOptions.Builder();
         discoveryOptions.setStrategy(getStrategy());
 
+        //                if (!Objects.equals(e.getMessage(), "8002: STATUS_ALREADY_DISCOVERING")) {
+        //                }
         mConnectionsClient.startDiscovery(getServiceId(), mEndpointDiscoveryCallback, discoveryOptions.build())
             .addOnSuccessListener(unusedResult -> onDiscoveryStarted())
 
-            .addOnFailureListener(e -> {
-                if (!Objects.equals(e.getMessage(), "8002: STATUS_ALREADY_DISCOVERING")) {
-                    onDiscoveryFailed(e);
-                }
-            });
+            .addOnFailureListener(this::onDiscoveryFailed);
     }
 
     /** Stops discovery. */
@@ -404,6 +461,10 @@ public class DisseminationService extends Service {
     /** Disconnects from all currently connected endpoints. */
     protected void disconnectFromAllEndpoints() {
         for (Endpoint endpoint : mHistoryExchangeConnections.values()) {
+            mConnectionsClient.disconnectFromEndpoint(endpoint.getId());
+        }
+
+        for (Endpoint endpoint : mMessageExchangeConnections.values()) {
             mConnectionsClient.disconnectFromEndpoint(endpoint.getId());
         }
 
@@ -456,14 +517,21 @@ public class DisseminationService extends Service {
     private void connectedToEndpoint(Endpoint endpoint) {
         Log.i("[NEARBY]", String.format("connectedToEndpoint(endpoint=%s)", endpoint));
 
+        // how many connections happened until now
         encounters++;
+        // just connected, first we got to send history to this node
         mHistoryExchangeConnections.put(endpoint.getId(), endpoint);
         Long encounteredId = Long.parseLong(endpoint.getId());
 
+        // update encountered nodes
         if (encounteredNodes.containsKey(encounteredId)) {
             ContactInfo contactInfo = encounteredNodes.get(encounteredId);
-            contactInfo.incrementContacts();
-            contactInfo.setLastEncounterTime(System.currentTimeMillis());
+
+            if (contactInfo != null) {
+                contactInfo.incrementContacts();
+                contactInfo.setLastEncounterTime(System.currentTimeMillis());
+            }
+
         } else {
             encounteredNodes.put(encounteredId, new ContactInfo(System.currentTimeMillis()));
         }
@@ -471,16 +539,17 @@ public class DisseminationService extends Service {
         onEndpointConnected(endpoint);
     }
 
-    private void disconnectedFromEndpoint(Endpoint endpoint) {
+    private void disconnectedFromEndpoint(String endpoint) {
         Log.i("[NEARBY]", String.format("disconnectedFromEndpoint(endpoint=%s)", endpoint));
 
-        mHistoryExchangeConnections.remove(endpoint.getId());
-        onEndpointDisconnected(endpoint);
+        mHistoryExchangeConnections.remove(endpoint);
+        mMessageExchangeConnections.remove(endpoint);
+
+        onEndpointDisconnected(Long.parseLong(endpoint));
     }
 
     /** Called when a connection with this endpoint has failed. */
     protected void onConnectionFailed(Endpoint endpoint) {
-        // Let's try someone else.
         if (getState() == State.SEARCHING) {
             startDiscovering();
         }
@@ -493,8 +562,9 @@ public class DisseminationService extends Service {
 
         // this is the first message when someone connected to us
         // compose HistoryPayload
-        Map<Long, Contact> encounters = new HashMap<>();
 
+        // create EncounteredNodes payload
+        Map<Long, Contact> encounters = new HashMap<>();
         for (Map.Entry<Long, ContactInfo> entry : encounteredNodes.entrySet()) {
             encounters.put(
                 entry.getKey(),
@@ -505,31 +575,47 @@ public class DisseminationService extends Service {
                     .build());
         }
 
+        // create SocialNetwork payload
+        Map<Long, Interests> network = new HashMap<>();
+        for (Map.Entry<Long, Set<Integer>> node : socialNetwork.entrySet()) {
+            network.put(
+                    node.getKey(),
+                    Interests.newBuilder()
+                            .addAllInterest(node.getValue())
+                            .build());
+        }
+
+        // build payload using classes compiled with protoc (ProtocolBuffers)
         History history = History.newBuilder()
-                .setSocialNetwork(SocialNetwork.newBuilder().addAllUserId(socialNetwork).build())
-                .setInterests(Interests.newBuilder().addAllInterest(interests).build())
+                .setSocialNetwork(SocialNetwork.newBuilder().putAllNode(network).build())
+
+                .setEncounteredInterests(EncounteredInterests.newBuilder().putAllInterests(encounteredInterests).build())
+
                 .setEncounteredNodes(EncounteredNodes.newBuilder().putAllEncounters(encounters).build())
                 .build();
 
+        // send history to endpoint
         send(Payload.fromBytes(history.toByteArray()), endpoint.getId());
-
-
-        // send messages
-        for (Message message : messages) {
-            send(Payload.fromBytes(MessageExch.newBuilder()
-                    .setSource(message.getSource())
-                    .setTimestamp(message.getTimestamp())
-                    .setTopic1(message.getTopic1())
-                    .setTopic2(message.getTopic2())
-                    .setTopic3(message.getTopic3())
-                    .build().toByteArray()), endpoint.getId());
-        }
     }
 
     /** Called when someone has disconnected. */
-    protected void onEndpointDisconnected(@NotNull Endpoint endpoint) {
-        Toast.makeText(this, "Disconnected: " +endpoint.getName(), Toast.LENGTH_SHORT).show();
+    protected void onEndpointDisconnected(@NotNull Long endpoint) {
+        Toast.makeText(this, "Disconnected: " + endpoint, Toast.LENGTH_SHORT).show();
         setState(State.SEARCHING);
+
+        // update duration of contact
+        if (encounteredNodes.containsKey(endpoint)) {
+            ContactInfo contactInfo = encounteredNodes.get(endpoint);
+
+            if (contactInfo != null) {
+                contactInfo.setDuration(System.currentTimeMillis() - contactInfo.getLastEncounterTime());
+            } else {
+                Log.w("[NEARBY]", "Contact info should've been previously initialized: " + endpoint);
+            }
+
+        } else {
+            Log.w("[NEARBY]", "Disconnected from " + endpoint + ", but we weren't previously connected.");
+        }
     }
 
     /**
@@ -538,15 +624,17 @@ public class DisseminationService extends Service {
      * @param payload The data you want to send.
      */
     protected void send(Payload payload) {
-        send(payload, mHistoryExchangeConnections.keySet());
-    }
-
-    private void send(Payload payload, Set<String> endpoints) {
         mConnectionsClient
-            .sendPayload(new ArrayList<>(endpoints), payload)
-            .addOnFailureListener(e -> Log.w("[NEARBY]", "sendPayload() failed.", e));
+                .sendPayload(new ArrayList<>(mHistoryExchangeConnections.keySet()), payload)
+                .addOnFailureListener(e ->
+                        Log.w("[NEARBY]", "sendPayload() to all connected endpoints failed.", e));
     }
 
+    /**
+     * Sends a {@link Payload} to a connected endpoint.
+     *
+     * @param payload The data you want to send.
+     */
     private void send(Payload payload, String endpoint) {
         mConnectionsClient.sendPayload(endpoint, payload)
                 .addOnFailureListener(e -> Log.w("[NEARBY]", "sendPayload() failed.", e));
@@ -563,30 +651,30 @@ public class DisseminationService extends Service {
         if (payload.getType() == Payload.Type.BYTES) {
             try {
                 History history = History.parseFrom(payload.asBytes());
-                // compute aggregation weight
-                Pair<Double, Double> utility = computeAggregationWeight(
-                                                    history,
-                                                    Long.parseLong(endpoint.getId()));
+                // update interests encounters based on the data we received
+                encounterInterests(history, Long.parseLong(endpoint.getId()));
 
-                double aggregationWeight;
-                if (utility == null) {
-                    aggregationWeight = 0;
-                } else {
-                    aggregationWeight = utility.second;
+                // compute aggregation weight <common topics, aggregation weight>
+                Pair<Double, Double> utility = computeAggregationWeight(history, Long.parseLong(endpoint.getId()));
 
-                    // aggregate social network
-                    aggregateSocialNetwork(history.getSocialNetwork().getUserIdList(), aggregationWeight);
-                    // aggregate interests
-                    aggregateInterests(history.getInterests().getInterestList(), aggregationWeight);
+                if (utility.second != 0) {
+                    // aggregate social network - if weight is 0, avoid unnecessary operations
+                    aggregateSocialNetwork(history.getSocialNetwork().getNodeMap(), utility.second);
                 }
-
+                // these two might add new keys in data structures, even though 0 values inserted
+                // aggregate interests
+                aggregateInterests(history.getEncounteredInterests().getInterestsMap(), utility.second);
                 // aggregate contacts - only one that can be modified when weight = 0
-                aggregateEncounteredNodes(history.getEncounteredNodes().getEncountersMap(), aggregationWeight);
+                aggregateEncounteredNodes(history.getEncounteredNodes().getEncountersMap(), utility.second);
 
-                // if there are no common topics, no need to exchange data
-                if (utility != null && utility.first == 0) {
+                // if there are no common topics, no need to exchange data - first part of ONSIDE FUNCTION
+                if (utility.first == 0) {
                     disconnect(endpoint);
+                    return;
                 }
+
+                // send messages that the encountered node is interested in
+                sendMessages(endpoint, history);
 
             } catch (InvalidProtocolBufferException e) {
                 Log.w("[NEARBY]", "Invalid payload from endpoint " + endpoint.getId());
@@ -595,12 +683,41 @@ public class DisseminationService extends Service {
         }
     }
 
+    /**
+     * Updates the encountered interests.
+     *
+     * @param history The first payload received from a node.
+     * @param userId The user id of the connected endpoint.
+     */
+    private void encounterInterests(@NotNull History history, Long userId) {
+        Map<Long, Interests> network = history.getSocialNetwork().getNodeMap();
+
+        if (network.containsKey(userId)) {
+            List<Integer> interests;
+            long newValue;
+
+            if (network.get(userId) != null) {
+                interests = Objects.requireNonNull(network.get(userId)).getInterestList();
+
+                for (int interest : interests) {
+                    if (encounteredInterests.containsKey(interest)
+                            && encounteredInterests.get(interest) != null) {
+                        newValue = encounteredInterests.get(interest) + 1;
+                        encounteredInterests.put(interest, newValue);
+                    } else {
+                        encounteredInterests.put(interest, (long) 1);
+                    }
+                }
+            }
+        }
+    }
+
     @Contract(pure = true)
-    private double getCommonNeighbours(@NotNull List<Long> encounteredSocialNetwork) {
+    private double getCommonNeighbours(@NotNull Set<Long> encounteredSocialNetwork) {
         double neighbours = 0;
 
         for (Long node : encounteredSocialNetwork) {
-            if (socialNetwork.contains(node)) {
+            if (socialNetwork.containsKey(node)) {
                 neighbours += 1;
             }
         }
@@ -608,12 +725,11 @@ public class DisseminationService extends Service {
         return neighbours;
     }
 
-    @Contract(pure = true)
-    private double getCommonInterest(@NotNull List<Integer> encounteredInterests) {
+    private double getCommonInterests(@NotNull List<Integer> encounteredInterests) {
         double friendship = 0;
 
-        for (Integer interest : encounteredInterests) {
-            if (interests.contains(interest)) {
+        for (Integer interest : Objects.requireNonNull(socialNetwork.get(Long.parseLong(getName())))) {
+            if (encounteredInterests.contains(interest)) {
                 friendship += 1;
             }
         }
@@ -621,57 +737,128 @@ public class DisseminationService extends Service {
         return friendship;
     }
 
-    // TODO add javadoc :)
-    @org.jetbrains.annotations.Nullable
+    /**
+     * Computes the aggregation weight between the encountered node and me.
+     *
+     * @param history the payload signifying the history of the encountered node
+     * @param endpointId the user id of the encountered node
+     * @return the aggregation weight between the two nodes
+     */
+    @NotNull
     private Pair<Double, Double> computeAggregationWeight(@NotNull History history, Long endpointId) {
+        // Because aggregation is done only after a set of contacts
+        // but friendship is needed whatever the case, do only necessary computations
+
+        // 1) friendship (common interests between the two nodes)
+        double nodeFriendship = 0;
+        if (history.getSocialNetwork().containsNode(endpointId)) {
+            nodeFriendship = getCommonInterests(history.getSocialNetwork().getNodeOrDefault(endpointId, null).getInterestList());
+        }
+
         if (encounters < contactsThreshold) {
-            return null;
+            return new Pair<>(nodeFriendship, 0.0);
+
+        } else {
+            // 1.1) normalize friendship value
+            if (maxFriendship < nodeFriendship) {
+                maxFriendship = nodeFriendship;
+            }
+            double nodeFriendshipN = maxFriendship == 0 ? 0 : nodeFriendship / maxFriendship;
+
+            // 2) similarity (number of common neighbours between individuals on social networks)
+            double nodeSimilarity = getCommonNeighbours(history.getSocialNetwork().getNodeMap().keySet());
+            if (maxSimilarity < nodeSimilarity) {
+                maxSimilarity = nodeSimilarity;
+            }
+            nodeSimilarity = maxSimilarity == 0 ? 0 : nodeSimilarity / maxSimilarity;
+
+            // 3) connectivity (whether nodes are social network friends);
+            double connectivity = socialNetwork.containsKey(endpointId) ? 1.0 : 0.0;
+
+            // 4) number of contacts between the two nodes
+            double nodeContacts = Objects.requireNonNull(encounteredNodes.get(endpointId)).getContacts();
+            if (maxContacts < nodeContacts) {
+                maxContacts = nodeContacts;
+            }
+            nodeContacts = maxContacts == 0 ? 0 : nodeContacts / maxContacts;
+
+            return new Pair<>(
+                nodeFriendship,
+                w1 * nodeSimilarity + w2 * nodeFriendshipN + w3 * connectivity + w4 * nodeContacts);
         }
-
-        // 1) similarity (number of common neighbours between individuals on social networks)
-        double nodeSimilarity = getCommonNeighbours(history.getSocialNetwork().getUserIdList());
-        if (maxSimilarity < nodeSimilarity) {
-            maxSimilarity = nodeSimilarity;
-        }
-        nodeSimilarity = maxSimilarity == 0 ? 0 : nodeSimilarity / maxSimilarity;
-
-        // 2) friendship (common interests)
-        double nodeFriendship = getCommonInterest(history.getInterests().getInterestList());
-        if(maxFriendship < nodeFriendship) {
-            maxFriendship = nodeFriendship;
-        }
-        nodeFriendship = maxFriendship == 0 ? 0 : nodeFriendship / maxFriendship;
-
-        // 3) connectivity (whether nodes are social network friends);
-        double connectivity = socialNetwork.contains(endpointId) ? 1.0 : 0.0;
-
-        // 4) number of contacts between the two nodes
-        double nodeContacts = Objects.requireNonNull(encounteredNodes.get(endpointId)).getContacts();
-        if (maxContacts < nodeContacts) {
-            maxContacts = nodeContacts;
-        }
-        nodeContacts = maxContacts == 0 ? 0 : nodeContacts / maxContacts;
-
-        return new Pair<>(
-                nodeFriendship, // so that if there aren't enough common interests, disconnectFromEndpoint
-                w1 * nodeSimilarity + w2 * nodeFriendship + w3 * connectivity + w4 * nodeContacts);
     }
 
-    // TODO add javadoc :)
-    private void aggregateSocialNetwork(List<Long> encounteredSocialNetwork, double aggregationWeight) {
+    /**
+     * Aggregates the social network of this node when it comes into contact with another node.
+     *
+     * Adds the entries from the encountered node into the local one.
+     *
+     * @param encounteredSocialNetwork the social network of the encountered node
+     * @param aggregationWeight aggregation weight
+     */
+    private void aggregateSocialNetwork(Map<Long, Interests> encounteredSocialNetwork, double aggregationWeight) {
         if (aggregationWeight > socialNetworkThreshold) {
-            socialNetwork.addAll(encounteredSocialNetwork);
+
+            for (Map.Entry<Long, Interests> node : encounteredSocialNetwork.entrySet()) {
+                if (socialNetwork.containsKey(node.getKey())) {
+                    Set<Integer> interests = socialNetwork.get(node.getKey());
+
+                    if (interests != null) {
+                        interests.addAll(node.getValue().getInterestList());
+                    } else {
+                        interests = new HashSet<>(node.getValue().getInterestList());
+                    }
+
+                    socialNetwork.put(node.getKey(), interests);
+
+                } else {
+                    socialNetwork.put(node.getKey(), new HashSet<>(node.getValue().getInterestList()));
+                }
+            }
         }
     }
 
-    // TODO add javadoc :)
-    private void aggregateInterests(List<Integer> encounteredInterests, double aggregationWeight) {
-        if (aggregationWeight > interestThreshold) {
-            interests.addAll(encounteredInterests);
+    /**
+     * Aggregates the local view of interests when it comes into contact with another node.
+     *
+     * max(local_value, weight * their_value), if interest exists locally
+     * weight * their_value                  , otherwise
+     *
+     * @param encounteredInterests the encountered node's view of interests
+     * @param aggregationWeight aggregation weight
+     */
+    private void aggregateInterests(@NotNull Map<Integer, Long> encounteredInterests, double aggregationWeight) {
+        for (Map.Entry<Integer, Long> interest : encounteredInterests.entrySet()) {
+            if (encounteredInterests.containsKey(interest.getKey())) {
+                Long timesEncountered = encounteredInterests.get(interest.getKey());
+
+                if (timesEncountered != null) {
+                    timesEncountered = (long) Math.max(timesEncountered, aggregationWeight * interest.getValue());
+
+                // for some reason, key was added with null value
+                } else {
+                    timesEncountered = (long) aggregationWeight * interest.getValue();
+                }
+
+                encounteredInterests.put(interest.getKey(), timesEncountered);
+
+                // this is a new interest
+            } else {
+                encounteredInterests.put(interest.getKey(), (long) aggregationWeight * interest.getValue());
+            }
         }
     }
 
-    // TODO add javadoc :)
+    /**
+     * Aggregates the contact info regarding encountered nodes locally with the data of the
+     * encountered node.
+     *
+     * max(local_value, weight * their_value), if interest exists locally
+     * weight * their_value                  , otherwise
+     *
+     * @param encounteredEN encountered nodes as seen by the other node
+     * @param aggregationWeight aggregation weight
+     */
     private void aggregateEncounteredNodes(@NotNull Map<Long, Contact> encounteredEN, double aggregationWeight) {
         for (Map.Entry<Long, Contact> e : encounteredEN.entrySet()) {
             // we've already met this node
@@ -679,24 +866,19 @@ public class DisseminationService extends Service {
                 ContactInfo contactInfo = encounteredNodes.get(e.getKey());
 
                 if (contactInfo != null) {
-                    contactInfo.setContacts(
-                        (int) Math.max(
-                                        contactInfo.getContacts(),
-                                        aggregationWeight * e.getValue().getContacts()));
+                    contactInfo.setContacts((int) Math.max(contactInfo.getContacts(), aggregationWeight * e.getValue().getContacts()));
+                    contactInfo.setDuration((long) Math.max(contactInfo.getDuration(), aggregationWeight * e.getValue().getDuration()));
+                    contactInfo.setLastEncounterTime((long) Math.max(contactInfo.getLastEncounterTime(), aggregationWeight * e.getValue().getLastEncounterTime()));
 
-                    contactInfo.setDuration(
-                            (long) Math.max(
-                                    contactInfo.getDuration(),
-                                    aggregationWeight * e.getValue().getDuration()));
-
-                    contactInfo.setLastEncounterTime(
-                        (long) Math.max(
-                                        contactInfo.getLastEncounterTime(),
-                                        aggregationWeight * e.getValue().getLastEncounterTime()));
-
-                    encounteredNodes.put(e.getKey(), contactInfo);
+                // for some reason, key was added with null value
+                } else {
+                    contactInfo = new ContactInfo(
+                        (int) aggregationWeight * e.getValue().getContacts(),
+                        (long) aggregationWeight * e.getValue().getDuration(),
+                        (long) aggregationWeight * e.getValue().getLastEncounterTime());
                 }
 
+                encounteredNodes.put(e.getKey(), contactInfo);
             // this is a new node
             } else {
                 ContactInfo contactInfo = new ContactInfo(
@@ -711,14 +893,161 @@ public class DisseminationService extends Service {
     }
 
     /**
+     * Performs the messages exchange between this node and the encountered one.
+     *
+     * This node will decide which messages to send to the other one - ONSIDE, but reversed
+     * If it got here, there is at least one topic in common between the two nodes
+     *
+     * @param endpoint the encountered node
+     * @param history their view of the network at the moment of connection
+     */
+    private void sendMessages(@NotNull Endpoint endpoint, History history) {
+        Long userId = Long.parseLong(endpoint.getId());
+
+        for (MessageObject message : messages) {
+            if (interested(message, history, userId)
+                    || interestedFriends(message, history, userId)
+                    || interestsEncountered(message, history)) {
+                // at least one topic mandatory, so verifications must be made before building the message
+                MessageExch.Builder messagePayload = MessageExch.newBuilder()
+                        .setSource(message.getSource())
+                        .setTimestamp(message.getTimestamp())
+                        .setTopic1(message.getTopic1());
+
+                if (message.getTopic2() != null) {
+                    messagePayload.setTopic2(message.getTopic2());
+                }
+                if (message.getTopic3() != null) {
+                    messagePayload.setTopic3(message.getTopic3());
+                }
+
+                // send message to the other node
+                send(Payload.fromBytes(messagePayload.build().toByteArray()), endpoint.getId());
+            }
+        }
+    }
+
+    /**
+     * Returns whether the other node is interested in at least one topic from the message.
+     *
+     * @param message the message to be sent
+     * @param history the encountered node's view of the network at the moment of connection
+     * @param userId the user id of the encountered node
+     *
+     * @return {@code true} if the other node is interested in the message, {@code false}
+     * otherwise
+     */
+    private boolean interested(MessageObject message, @NotNull History history, Long userId) {
+        if (history.getSocialNetwork().containsNode(userId)) {
+            Interests nodeInterests = history.getSocialNetwork().getNodeOrDefault(userId, null);
+
+            if (nodeInterests != null) {
+                List<Integer> interests = nodeInterests.getInterestList();
+
+                if (interests.contains(message.getTopic1())) {
+                    return true;
+                }
+
+                if (message.getTopic2() != null) {
+                    if (interests.contains(message.getTopic2())) {
+                        return true;
+                    }
+                }
+
+                if (message.getTopic3() != null) {
+                    return interests.contains(message.getTopic3());
+                }
+
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the other node's friends are interested in at least one topic from the message.
+     *
+     * @param message the message to be sent
+     * @param history the encountered node's view of the network at the moment of connection
+     * @param userId the user id of the encountered node
+     *
+     * @return {@code true} if the other node's friends are interested in the message, {@code false}
+     * otherwise
+     */
+    private boolean interestedFriends(MessageObject message, @NotNull History history, Long userId) {
+        int interestedFriends = 0;
+        Interests nodeInterests;
+        List<Integer> interests;
+
+        for (Map.Entry<Long, Interests> node : history.getSocialNetwork().getNodeMap().entrySet()) {
+            if (!node.getKey().equals(userId)) {
+                nodeInterests = node.getValue();
+
+                if (nodeInterests != null) {
+                    interests = nodeInterests.getInterestList();
+
+                    if (interests.contains(message.getTopic1())) {
+                        interestedFriends += 1;
+                    } else if (message.getTopic2() != null) {
+                        if (interests.contains(message.getTopic2())) {
+                            interestedFriends += 1;
+                        }
+                    } else if (message.getTopic3() != null) {
+                        if (interests.contains(message.getTopic2())) {
+                            interestedFriends += 1;
+                        }
+                    }
+
+                    if (interestedFriends > interestedFriendsThreshold) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether this node is likely to encounter a node with given interests,
+     * based on the history of encountered interests
+     *
+     * @param message the message to check against
+     * @param history the other node's view of the network at the moment of connection
+     *
+     * @return {@code true} if the given node is likely to encounter the set of interests,
+     * {@code false} otherwise
+     */
+    private boolean interestsEncountered(MessageObject message, @NotNull History history) {
+        long total = 0, util = 0;
+
+        Map<Integer, Long> eInterests = history.getEncounteredInterests().getInterestsMap();
+
+        for (Map.Entry<Integer, Long> e : eInterests.entrySet()) {
+            total += e.getValue();
+
+            if (message.getTopic1().equals(e.getKey())) {
+                util += e.getValue();
+            } else if (message.getTopic2() != null) {
+                if (message.getTopic2().equals(e.getKey())) {
+                    util += e.getValue();
+                }
+            } else if (message.getTopic3() != null) {
+                if (message.getTopic3().equals(e.getKey())) {
+                    util += e.getValue();
+                }
+            }
+        }
+
+        return ((double) util / total) > encounteredInterestsThreshold;
+    }
+
+    /**
      * Someone connected to us has sent us one of their messages.
      *
      * @param endpoint The sender.
      * @param payload The data.
      */
     protected void onReceiveMessage(Endpoint endpoint, @NotNull Payload payload) {
-        // TODO aici adaug mesajul in baza de date si in lista utilizatorului
-
         if (payload.getType() == Payload.Type.BYTES) {
             try {
                 MessageExch message = MessageExch.parseFrom(payload.asBytes());
@@ -801,16 +1130,6 @@ public class DisseminationService extends Service {
      */
     protected Strategy getStrategy() {
         return STRATEGY;
-    }
-
-    /** Returns a list of currently connected endpoints. */
-    protected Set<Endpoint> getDiscoveredEndpoints() {
-        return new HashSet<>(mDiscoveredEndpoints.values());
-    }
-
-    /** Returns a list of currently connected endpoints. */
-    protected Set<Endpoint> getConnectedEndpoints() {
-        return new HashSet<>(mHistoryExchangeConnections.values());
     }
 
     /**

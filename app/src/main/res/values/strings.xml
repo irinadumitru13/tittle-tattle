@@ -6,7 +6,7 @@
 
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
+    <string name="title_dashboard">Publish</string>
     <string name="title_notifications">Notifications</string>
     <string name="main_app_name">tittle-tattle</string>
     <string name="img_login_content_desc">Login image</string>
@@ -35,6 +35,7 @@
     <string name="no_topics_text1">You aren\'t subscribed to any topics.</string>
     <string name="no_topics_text2">Subscriptions needed for publishing messages.</string>
     <string name="publish_image">Publish image</string>
+    <string name="my_published_messages">My published messages</string>
 
     <string-array name="categories_resources" translatable="false">
         <item>area_of_activity</item>

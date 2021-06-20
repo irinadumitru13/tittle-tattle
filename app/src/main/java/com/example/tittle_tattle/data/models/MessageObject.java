@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @Entity(tableName = "messages")
 public class MessageObject {
     @PrimaryKey(autoGenerate = true)
+    @NonNull
     private Integer id;
 
     @NonNull

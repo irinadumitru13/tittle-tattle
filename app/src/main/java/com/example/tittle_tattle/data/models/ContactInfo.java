@@ -1,10 +1,14 @@
 package com.example.tittle_tattle.data.models;
 
+import androidx.annotation.NonNull;
 import androidx.room.Ignore;
 
 public class ContactInfo {
+    @NonNull
     private int contacts;
+    @NonNull
     private long duration;
+    @NonNull
     private long lastEncounterTime;
 
     @Ignore

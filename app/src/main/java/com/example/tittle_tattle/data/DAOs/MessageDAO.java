@@ -21,8 +21,8 @@ public interface MessageDAO {
     void deleteById(int id);
 
     @Query("SELECT * FROM messages WHERE source = :user_id ORDER BY timestamp")
-    Single<List<MessageObject>> findAllByUserId(long user_id);
+    List<MessageObject> findAllByUserId(long user_id);
 
-    @Query("SELECT * FROM messages ORDER BY timestamp DESC")
-    List<MessageObject> findAll();
+    @Query("SELECT * FROM messages WHERE source <> :user_id ORDER BY timestamp DESC")
+    List<MessageObject> findAllExceptUserId(long user_id);
 }

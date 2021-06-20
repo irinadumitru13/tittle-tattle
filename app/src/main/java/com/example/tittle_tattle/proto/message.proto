@@ -8,8 +8,8 @@ option optimize_for = SPEED;
 message MessageExch {
   int64 source = 1;
   int64 timestamp = 2;
-  int32 topic1 = 3;
-  int32 topic2 = 4;
-  int32 topic3 = 5;
-  string content = 6;
+  string content = 3;
+  int32 topic1 = 4;
+  int32 topic2 = 5;
+  int32 topic3 = 6;
 }

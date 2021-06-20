@@ -1,6 +1,5 @@
 package com.example.tittle_tattle.ui.homeScreen.fragments;
 
-import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.tittle_tattle.R;
-import com.example.tittle_tattle.algorithm.DisseminationService;
 import com.example.tittle_tattle.databinding.FragmentHomeBinding;
 import com.example.tittle_tattle.ui.homeScreen.SharedViewModel;
 
@@ -57,6 +55,13 @@ public class HomeFragment extends Fragment {
         topics_btn.setOnClickListener(v -> {
             Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_topics);
         });
+
+        Button messages_btn = view.findViewById(R.id.btn_pub_msg);
+        messages_btn.setPaintFlags(topics_btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
+//        messages_btn.setOnClickListener(v -> {
+//            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_topics);
+//        });
     }
 
     @Override

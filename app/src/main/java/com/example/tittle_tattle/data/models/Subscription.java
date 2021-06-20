@@ -2,9 +2,19 @@ package com.example.tittle_tattle.data.models;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "subscriptions")
+@Entity(
+        tableName = "subscriptions",
+        foreignKeys = {
+            @ForeignKey(
+                entity = User.class,
+                parentColumns = "user_id",
+                childColumns = "user_id",
+                onDelete = ForeignKey.CASCADE
+        )}
+)
 public class Subscription {
     @PrimaryKey(autoGenerate = true)
     private Integer id;

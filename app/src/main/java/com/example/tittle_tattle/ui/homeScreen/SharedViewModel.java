@@ -11,6 +11,7 @@ import androidx.lifecycle.SavedStateHandle;
 
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
+import com.example.tittle_tattle.data.models.SocialNetworkObject;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.data.models.User;
 import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
@@ -72,44 +73,36 @@ public class SharedViewModel extends AndroidViewModel {
         state.set("full_name", fullName);
     }
 
-    public LiveData<ArrayList<String>> getFriends() {
-        if (!state.contains("friends")) {
-            AccessToken accessToken = getAccessToken();
-            List<String> friendIds = new ArrayList<>();
+    public void getFriends() {
+        AccessToken accessToken = getAccessToken();
 
-            // get friends of authenticated user
-            new GraphRequest(
-                    accessToken,
-                    "/" + accessToken.getUserId() + "/friends",
-                    null,
-                    HttpMethod.GET,
-                    response -> {
-                        JSONObject responseJson = response.getJSONObject();
+        // get friends of authenticated user
+        new GraphRequest(
+            accessToken,
+            "/" + accessToken.getUserId() + "/friends",
+            null,
+            HttpMethod.GET,
+            response -> {
+                JSONObject responseJson = response.getJSONObject();
 
-                        if (responseJson != null && responseJson.has("data")) {
-                            try {
-                                JSONArray friends = (JSONArray) responseJson.get("data");
-                                for (int i = 0; i < friends.length(); i++) {
-                                    friendIds.add(((JSONObject)friends.get(i)).get("id").toString());
-                                }
+                if (responseJson != null && responseJson.has("data")) {
+                    try {
+                        JSONArray friends = (JSONArray) responseJson.get("data");
+                        for (int i = 0; i < friends.length(); i++) {
+                            Long id = Long.parseLong(((JSONObject)friends.get(i)).get("id").toString());
 
-                                state.set("friends", friendIds);
-                            } catch (Exception e) {
-                                Log.e("[GRAPH API] exception", e.getMessage());
-                            }
+                            AsyncTask.execute(() ->
+                                database.socialNetworkDAO().insert(new SocialNetworkObject(id, null)));
                         }
-                    }).executeAsync();
-        }
-
-        return state.getLiveData("friends");
+                    } catch (Exception e) {
+                        Log.e("[GRAPH API] exception", e.getMessage());
+                    }
+                }
+            }).executeAsync();
     }
 
     public LiveData<String> getNotificationText() {
         return state.getLiveData("notifications");
-    }
-
-    public LiveData<String> getDashboardText() {
-        return state.getLiveData("dashboard");
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -131,29 +124,29 @@ public class SharedViewModel extends AndroidViewModel {
                 setFullName(user.getFull_name());
             } else {
                 new GraphRequest(
-                        accessToken,
-                        "/" + accessToken.getUserId() + "/",
-                        null,
-                        HttpMethod.GET,
-                        response -> {
-                            JSONObject responseJson = response.getJSONObject();
-                            if (responseJson != null && responseJson.has("name")) {
-                                try {
-                                    setFullName((String) responseJson.get("name"));
-                                    AsyncTask.execute(() -> {
-                                        try {
-                                            database.insertUser(
-                                                    new User(Long.parseLong(accessToken.getUserId()),
-                                                            responseJson.get("name").toString()));
-                                        } catch (JSONException e) {
-                                            e.printStackTrace();
-                                        }
-                                    });
-                                } catch (Exception e) {
-                                    Log.e("[GRAPH API] exception", e.getMessage());
-                                }
+                    accessToken,
+                    "/" + accessToken.getUserId() + "/",
+                    null,
+                    HttpMethod.GET,
+                    response -> {
+                        JSONObject responseJson = response.getJSONObject();
+                        if (responseJson != null && responseJson.has("name")) {
+                            try {
+                                setFullName((String) responseJson.get("name"));
+                                AsyncTask.execute(() -> {
+                                    try {
+                                        database.insertUser(
+                                                new User(Long.parseLong(accessToken.getUserId()),
+                                                        responseJson.get("name").toString()));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            } catch (Exception e) {
+                                Log.e("[GRAPH API] exception", e.getMessage());
                             }
                         }
+                    }
                 ).executeAsync();
             }
 

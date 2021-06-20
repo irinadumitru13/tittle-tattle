@@ -59,25 +59,25 @@ private static final long serialVersionUID = 0L;
             timestamp_ = input.readInt64();
             break;
           }
-          case 24: {
+          case 26: {
+            java.lang.String s = input.readStringRequireUtf8();
 
-            topic1_ = input.readInt32();
+            content_ = s;
             break;
           }
           case 32: {
 
-            topic2_ = input.readInt32();
+            topic1_ = input.readInt32();
             break;
           }
           case 40: {
 
-            topic3_ = input.readInt32();
+            topic2_ = input.readInt32();
             break;
           }
-          case 50: {
-            java.lang.String s = input.readStringRequireUtf8();
+          case 48: {
 
-            content_ = s;
+            topic3_ = input.readInt32();
             break;
           }
           default: {
@@ -134,43 +134,10 @@ private static final long serialVersionUID = 0L;
     return timestamp_;
   }
 
-  public static final int TOPIC1_FIELD_NUMBER = 3;
-  private int topic1_;
-  /**
-   * <code>int32 topic1 = 3;</code>
-   * @return The topic1.
-   */
-  @java.lang.Override
-  public int getTopic1() {
-    return topic1_;
-  }
-
-  public static final int TOPIC2_FIELD_NUMBER = 4;
-  private int topic2_;
-  /**
-   * <code>int32 topic2 = 4;</code>
-   * @return The topic2.
-   */
-  @java.lang.Override
-  public int getTopic2() {
-    return topic2_;
-  }
-
-  public static final int TOPIC3_FIELD_NUMBER = 5;
-  private int topic3_;
-  /**
-   * <code>int32 topic3 = 5;</code>
-   * @return The topic3.
-   */
-  @java.lang.Override
-  public int getTopic3() {
-    return topic3_;
-  }
-
-  public static final int CONTENT_FIELD_NUMBER = 6;
+  public static final int CONTENT_FIELD_NUMBER = 3;
   private volatile java.lang.Object content_;
   /**
-   * <code>string content = 6;</code>
+   * <code>string content = 3;</code>
    * @return The content.
    */
   @java.lang.Override
@@ -187,7 +154,7 @@ private static final long serialVersionUID = 0L;
     }
   }
   /**
-   * <code>string content = 6;</code>
+   * <code>string content = 3;</code>
    * @return The bytes for content.
    */
   @java.lang.Override
@@ -203,6 +170,39 @@ private static final long serialVersionUID = 0L;
     } else {
       return (com.google.protobuf.ByteString) ref;
     }
+  }
+
+  public static final int TOPIC1_FIELD_NUMBER = 4;
+  private int topic1_;
+  /**
+   * <code>int32 topic1 = 4;</code>
+   * @return The topic1.
+   */
+  @java.lang.Override
+  public int getTopic1() {
+    return topic1_;
+  }
+
+  public static final int TOPIC2_FIELD_NUMBER = 5;
+  private int topic2_;
+  /**
+   * <code>int32 topic2 = 5;</code>
+   * @return The topic2.
+   */
+  @java.lang.Override
+  public int getTopic2() {
+    return topic2_;
+  }
+
+  public static final int TOPIC3_FIELD_NUMBER = 6;
+  private int topic3_;
+  /**
+   * <code>int32 topic3 = 6;</code>
+   * @return The topic3.
+   */
+  @java.lang.Override
+  public int getTopic3() {
+    return topic3_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -225,17 +225,17 @@ private static final long serialVersionUID = 0L;
     if (timestamp_ != 0L) {
       output.writeInt64(2, timestamp_);
     }
+    if (!getContentBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, content_);
+    }
     if (topic1_ != 0) {
-      output.writeInt32(3, topic1_);
+      output.writeInt32(4, topic1_);
     }
     if (topic2_ != 0) {
-      output.writeInt32(4, topic2_);
+      output.writeInt32(5, topic2_);
     }
     if (topic3_ != 0) {
-      output.writeInt32(5, topic3_);
-    }
-    if (!getContentBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, content_);
+      output.writeInt32(6, topic3_);
     }
     unknownFields.writeTo(output);
   }
@@ -254,20 +254,20 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeInt64Size(2, timestamp_);
     }
+    if (!getContentBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, content_);
+    }
     if (topic1_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(3, topic1_);
+        .computeInt32Size(4, topic1_);
     }
     if (topic2_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(4, topic2_);
+        .computeInt32Size(5, topic2_);
     }
     if (topic3_ != 0) {
       size += com.google.protobuf.CodedOutputStream
-        .computeInt32Size(5, topic3_);
-    }
-    if (!getContentBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, content_);
+        .computeInt32Size(6, topic3_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -288,14 +288,14 @@ private static final long serialVersionUID = 0L;
         != other.getSource()) return false;
     if (getTimestamp()
         != other.getTimestamp()) return false;
+    if (!getContent()
+        .equals(other.getContent())) return false;
     if (getTopic1()
         != other.getTopic1()) return false;
     if (getTopic2()
         != other.getTopic2()) return false;
     if (getTopic3()
         != other.getTopic3()) return false;
-    if (!getContent()
-        .equals(other.getContent())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -313,14 +313,14 @@ private static final long serialVersionUID = 0L;
     hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
         getTimestamp());
+    hash = (37 * hash) + CONTENT_FIELD_NUMBER;
+    hash = (53 * hash) + getContent().hashCode();
     hash = (37 * hash) + TOPIC1_FIELD_NUMBER;
     hash = (53 * hash) + getTopic1();
     hash = (37 * hash) + TOPIC2_FIELD_NUMBER;
     hash = (53 * hash) + getTopic2();
     hash = (37 * hash) + TOPIC3_FIELD_NUMBER;
     hash = (53 * hash) + getTopic3();
-    hash = (37 * hash) + CONTENT_FIELD_NUMBER;
-    hash = (53 * hash) + getContent().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -458,13 +458,13 @@ private static final long serialVersionUID = 0L;
 
       timestamp_ = 0L;
 
+      content_ = "";
+
       topic1_ = 0;
 
       topic2_ = 0;
 
       topic3_ = 0;
-
-      content_ = "";
 
       return this;
     }
@@ -494,10 +494,10 @@ private static final long serialVersionUID = 0L;
       com.example.tittle_tattle.algorithm.proto.MessageExch result = new com.example.tittle_tattle.algorithm.proto.MessageExch(this);
       result.source_ = source_;
       result.timestamp_ = timestamp_;
+      result.content_ = content_;
       result.topic1_ = topic1_;
       result.topic2_ = topic2_;
       result.topic3_ = topic3_;
-      result.content_ = content_;
       onBuilt();
       return result;
     }
@@ -552,6 +552,10 @@ private static final long serialVersionUID = 0L;
       if (other.getTimestamp() != 0L) {
         setTimestamp(other.getTimestamp());
       }
+      if (!other.getContent().isEmpty()) {
+        content_ = other.content_;
+        onChanged();
+      }
       if (other.getTopic1() != 0) {
         setTopic1(other.getTopic1());
       }
@@ -560,10 +564,6 @@ private static final long serialVersionUID = 0L;
       }
       if (other.getTopic3() != 0) {
         setTopic3(other.getTopic3());
-      }
-      if (!other.getContent().isEmpty()) {
-        content_ = other.content_;
-        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -656,102 +656,9 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private int topic1_ ;
-    /**
-     * <code>int32 topic1 = 3;</code>
-     * @return The topic1.
-     */
-    @java.lang.Override
-    public int getTopic1() {
-      return topic1_;
-    }
-    /**
-     * <code>int32 topic1 = 3;</code>
-     * @param value The topic1 to set.
-     * @return This builder for chaining.
-     */
-    public Builder setTopic1(int value) {
-      
-      topic1_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 topic1 = 3;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearTopic1() {
-      
-      topic1_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int topic2_ ;
-    /**
-     * <code>int32 topic2 = 4;</code>
-     * @return The topic2.
-     */
-    @java.lang.Override
-    public int getTopic2() {
-      return topic2_;
-    }
-    /**
-     * <code>int32 topic2 = 4;</code>
-     * @param value The topic2 to set.
-     * @return This builder for chaining.
-     */
-    public Builder setTopic2(int value) {
-      
-      topic2_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 topic2 = 4;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearTopic2() {
-      
-      topic2_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private int topic3_ ;
-    /**
-     * <code>int32 topic3 = 5;</code>
-     * @return The topic3.
-     */
-    @java.lang.Override
-    public int getTopic3() {
-      return topic3_;
-    }
-    /**
-     * <code>int32 topic3 = 5;</code>
-     * @param value The topic3 to set.
-     * @return This builder for chaining.
-     */
-    public Builder setTopic3(int value) {
-      
-      topic3_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int32 topic3 = 5;</code>
-     * @return This builder for chaining.
-     */
-    public Builder clearTopic3() {
-      
-      topic3_ = 0;
-      onChanged();
-      return this;
-    }
-
     private java.lang.Object content_ = "";
     /**
-     * <code>string content = 6;</code>
+     * <code>string content = 3;</code>
      * @return The content.
      */
     public java.lang.String getContent() {
@@ -767,7 +674,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string content = 6;</code>
+     * <code>string content = 3;</code>
      * @return The bytes for content.
      */
     public com.google.protobuf.ByteString
@@ -784,7 +691,7 @@ private static final long serialVersionUID = 0L;
       }
     }
     /**
-     * <code>string content = 6;</code>
+     * <code>string content = 3;</code>
      * @param value The content to set.
      * @return This builder for chaining.
      */
@@ -799,7 +706,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string content = 6;</code>
+     * <code>string content = 3;</code>
      * @return This builder for chaining.
      */
     public Builder clearContent() {
@@ -809,7 +716,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>string content = 6;</code>
+     * <code>string content = 3;</code>
      * @param value The bytes for content to set.
      * @return This builder for chaining.
      */
@@ -821,6 +728,99 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       content_ = value;
+      onChanged();
+      return this;
+    }
+
+    private int topic1_ ;
+    /**
+     * <code>int32 topic1 = 4;</code>
+     * @return The topic1.
+     */
+    @java.lang.Override
+    public int getTopic1() {
+      return topic1_;
+    }
+    /**
+     * <code>int32 topic1 = 4;</code>
+     * @param value The topic1 to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTopic1(int value) {
+      
+      topic1_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 topic1 = 4;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTopic1() {
+      
+      topic1_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int topic2_ ;
+    /**
+     * <code>int32 topic2 = 5;</code>
+     * @return The topic2.
+     */
+    @java.lang.Override
+    public int getTopic2() {
+      return topic2_;
+    }
+    /**
+     * <code>int32 topic2 = 5;</code>
+     * @param value The topic2 to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTopic2(int value) {
+      
+      topic2_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 topic2 = 5;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTopic2() {
+      
+      topic2_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private int topic3_ ;
+    /**
+     * <code>int32 topic3 = 6;</code>
+     * @return The topic3.
+     */
+    @java.lang.Override
+    public int getTopic3() {
+      return topic3_;
+    }
+    /**
+     * <code>int32 topic3 = 6;</code>
+     * @param value The topic3 to set.
+     * @return This builder for chaining.
+     */
+    public Builder setTopic3(int value) {
+      
+      topic3_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>int32 topic3 = 6;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearTopic3() {
+      
+      topic3_ = 0;
       onChanged();
       return this;
     }

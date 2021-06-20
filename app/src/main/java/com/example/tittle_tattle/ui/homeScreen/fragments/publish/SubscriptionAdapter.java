@@ -20,7 +20,7 @@ public class SubscriptionAdapter extends ArrayAdapter<Subscription> {
     private List<Subscription> subscriptions;
 
     public SubscriptionAdapter(@NonNull Context context, List<Subscription> subscriptions) {
-        super(context, R.layout.checked_multiple_choice_item, subscriptions);
+        super(context, R.layout.checked_item_layout, subscriptions);
         this.context = context;
         this.subscriptions = subscriptions;
     }
@@ -30,7 +30,7 @@ public class SubscriptionAdapter extends ArrayAdapter<Subscription> {
         View listItem = view;
 
         if (listItem == null) {
-            listItem = LayoutInflater.from(context).inflate(R.layout.checked_multiple_choice_item, parent, false);
+            listItem = LayoutInflater.from(context).inflate(R.layout.checked_item_layout, parent, false);
         }
 
         CheckedTextView textView = listItem.findViewById(R.id.checked_item);

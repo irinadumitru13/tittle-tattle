@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
 import com.example.tittle_tattle.R;
+import com.example.tittle_tattle.algorithm.DisseminationService;
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.MessageObject;
@@ -117,15 +118,15 @@ public class DashboardFragment extends Fragment {
                     @Override
                     public void run() {
                         Log.i("[DB]", "publish message");
+                        MessageObject message = new MessageObject(
+                                ISUser.getUser().getId(),
+                                content,
+                                topics.get(0),
+                                1 < topics.size() ? topics.get(1) : null,
+                                2 < topics.size() ? topics.get(2): null);
 
-                        AppDatabase.getInstance(view.getContext()).publishMessage(
-                                new MessageObject(
-                                        ISUser.getUser().getId(),
-                                        content,
-                                        topics.get(0),
-                                        1 < topics.size() ? topics.get(1) : null,
-                                        2 < topics.size() ? topics.get(2): null)
-                        );
+                        AppDatabase.getInstance(view.getContext()).publishMessage(message);
+                        DisseminationService.addMessage(message);
                     }
                 });
 

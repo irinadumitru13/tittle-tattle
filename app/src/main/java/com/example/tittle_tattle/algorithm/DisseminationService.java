@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -19,6 +20,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.example.tittle_tattle.R;
 import com.example.tittle_tattle.algorithm.proto.Contact;
@@ -30,7 +33,10 @@ import com.example.tittle_tattle.algorithm.proto.MessageExch;
 import com.example.tittle_tattle.algorithm.proto.SocialNetwork;
 import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.ContactInfo;
+import com.example.tittle_tattle.data.models.EncounteredInterestsObject;
+import com.example.tittle_tattle.data.models.EncounteredNodesObject;
 import com.example.tittle_tattle.data.models.MessageObject;
+import com.example.tittle_tattle.data.models.SocialNetworkObject;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -60,6 +66,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * DisseminationService. This Service has 3 {@link State}s.
@@ -74,7 +81,6 @@ import java.util.Set;
  * down the volume keys and speaking into the phone. Advertising and discovery have both stopped.
  */
 public class DisseminationService extends Service {
-    private Looper serviceLooper;
     private ServiceHandler serviceHandler;
     /** Our handler to Nearby Connections. */
     private ConnectionsClient mConnectionsClient;
@@ -122,63 +128,98 @@ public class DisseminationService extends Service {
     private final double w1 = 0.25, w2 = 0.25, w3 = 0.25, w4 = 0.25;
 
     /** Social network threshold. */
-    private double socialNetworkThreshold;
+    private double socialNetworkThreshold = 0.5;
     /** Interest threshold. */
-    private double interestThreshold;
+    private double interestThreshold = 0.1;
     /** Contacts threshold. */
-    private int contactsThreshold;
+    private int contactsThreshold = 100;
     /** Interested friends threshold - for ONSIDE algorithm */
-    private int interestedFriendsThreshold;
+    private int interestedFriendsThreshold = 1;
     /** Encountered interests threshold - for ONSIDE algorithm */
-    private double encounteredInterestsThreshold;
+    private double encounteredInterestsThreshold = 1.0;
 
     /** How many contacts has this node made. */
     private long encounters = 0;
 
     /** List of nodes encountered by the current node during a time window. */
-    private final Map<Long, ContactInfo> encounteredNodes = new HashMap<>();
+    private Map<Long, ContactInfo> encounteredNodes;
     /** Social network - user id with their interests */
-    // TODO add me in my social network so that others would know what i m interested in
-    private final Map<Long, Set<Integer>> socialNetwork = new HashMap<>();
+    private static Map<Long, Set<Integer>> socialNetwork;
     /** Interests */
-    private final Map<Integer, Long> encounteredInterests = new HashMap<>();
-    /** Messages to be transmitted */
+    private Map<Integer, Long> encounteredInterests;
+
+    /** Messages published by this node. */
+    private static final Set<MessageObject> ownMessages = new HashSet<>();
+    /** Messages received from other nodes. */
     private Set<MessageObject> messages;
+
+    public static void addMessage(MessageObject message) {
+        ownMessages.add(message);
+    }
+
+    private static Set<MessageObject> getOwnMessages() {
+        return ownMessages;
+    }
+
+    private static void addInterest(long userId, int interest) {
+        Set<Integer> interests;
+        if (socialNetwork.get(userId) == null) {
+            interests = new HashSet<>();
+        } else {
+            interests = socialNetwork.get(userId);
+
+            if (interests == null) {
+                interests = new HashSet<>();
+            }
+        }
+
+        interests.add(interest);
+        socialNetwork.put(userId, interests);
+    }
+
+    private static void deleteInterest(long userId, int interest) {
+        if (socialNetwork.containsKey(userId)) {
+            Set<Integer> interests = socialNetwork.get(userId);
+
+            if (interests != null) {
+                interests.remove(interest);
+            }
+        }
+    }
 
     @Override
     public void onCreate() {
         super.onCreate();
         startService();
-        // TODO extract data from db
         Log.i("[NEARBY]", "Service onCreate()");
 
         HandlerThread thread = new HandlerThread("ServiceStartArguments",
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
 
-        serviceLooper = thread.getLooper();
+        Looper serviceLooper = thread.getLooper();
         serviceHandler = new ServiceHandler(serviceLooper);
-
-//        mName = String.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0));
-//
-//        mConnectionsClient = Nearby.getConnectionsClient(this);
-//        setState(State.SEARCHING);
     }
 
     private final class ServiceHandler extends Handler {
         private final AppDatabase db = AppDatabase.getInstance(getApplicationContext());
-
         public ServiceHandler(Looper looper) {
             super(looper);
         }
 
         @Override
         public void handleMessage(@NotNull android.os.Message msg) {
-            messages = new LinkedHashSet<>(db.messageDAO().findAll());
+            long userId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0);
+            mName = String.valueOf(userId);
 
-            Log.i("[MESSAGES]", String.valueOf(messages.size()));
+            messages = new LinkedHashSet<>(db.messageDAO().findAllExceptUserId(userId));
+            ownMessages.addAll(db.messageDAO().findAllByUserId(userId));
 
-            mName = String.valueOf(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0));
+            socialNetwork = (db.socialNetworkDAO().findAll()).stream().collect(Collectors.toMap(SocialNetworkObject::getId, SocialNetworkObject::getInterests));
+            socialNetwork.put(userId, ISUser.getUser().getTopics());
+
+            encounteredNodes = (db.encounteredNodesDAO().findAll().stream().collect(Collectors.toMap(EncounteredNodesObject::getUserId, EncounteredNodesObject::getContactInfo)));
+            encounteredInterests = (db.encounteredInterestsDAO().findAll().stream().collect(Collectors.toMap(EncounteredInterestsObject::getId, EncounteredInterestsObject::getTimes)));
 
             mConnectionsClient = Nearby.getConnectionsClient(getApplicationContext());
             setState(State.SEARCHING);
@@ -207,7 +248,9 @@ public class DisseminationService extends Service {
         super.onDestroy();
         Toast.makeText(this, "tittle-tattle service done", Toast.LENGTH_SHORT).show();
         // TODO put data in db
-        stopAllEndpoints();
+        if (mConnectionsClient != null) {
+            stopAllEndpoints();
+        }
     }
 
     private void createNotificationChannel() {
@@ -275,8 +318,6 @@ public class DisseminationService extends Service {
                     return;
                 }
 
-                // TODO calculate duration with endpoint
-                // TODO see from where to delete
                 disconnectedFromEndpoint(endpointId);
             }
         };
@@ -317,6 +358,8 @@ public class DisseminationService extends Service {
 
                     onReceiveHistory(Objects.requireNonNull(mMessageExchangeConnections.get(endpointId)), payload);
                 } else if (mMessageExchangeConnections.containsKey(endpointId)) {
+                    Log.i("[NEARBY MESSAGES]", "Message received");
+
                     onReceiveMessage(mMessageExchangeConnections.get(endpointId), payload);
                 } else {
                     Log.w("[NEARBY]",
@@ -345,14 +388,8 @@ public class DisseminationService extends Service {
 
         mConnectionsClient
             .startAdvertising(localEndpointName, getServiceId(), mConnectionLifecycleCallback, advertisingOptions.build())
-
             .addOnSuccessListener(unusedResult -> onAdvertisingStarted())
-
-            .addOnFailureListener(e -> {
-//                if (!Objects.equals(e.getMessage(), "8001: STATUS_ALREADY_ADVERTISING")) {
-                    onAdvertisingFailed(e);
-//                }
-            });
+            .addOnFailureListener(this::onAdvertisingFailed);
     }
 
     /** Stops advertising. */
@@ -411,11 +448,8 @@ public class DisseminationService extends Service {
         DiscoveryOptions.Builder discoveryOptions = new DiscoveryOptions.Builder();
         discoveryOptions.setStrategy(getStrategy());
 
-        //                if (!Objects.equals(e.getMessage(), "8002: STATUS_ALREADY_DISCOVERING")) {
-        //                }
         mConnectionsClient.startDiscovery(getServiceId(), mEndpointDiscoveryCallback, discoveryOptions.build())
             .addOnSuccessListener(unusedResult -> onDiscoveryStarted())
-
             .addOnFailureListener(this::onDiscoveryFailed);
     }
 
@@ -432,7 +466,7 @@ public class DisseminationService extends Service {
 
     /** Called when discovery successfully starts. Override this method to act on the event. */
     protected void onDiscoveryStarted() {
-        Log.i("[NEARBY]", "Now endpoint " + getName() + "discovering");
+        Log.i("[NEARBY]", "Now endpoint " + getName() + " discovering");
     }
 
     /** Called when discovery fails to start. Override this method to act on the event. */
@@ -521,7 +555,7 @@ public class DisseminationService extends Service {
         encounters++;
         // just connected, first we got to send history to this node
         mHistoryExchangeConnections.put(endpoint.getId(), endpoint);
-        Long encounteredId = Long.parseLong(endpoint.getId());
+        Long encounteredId = Long.parseLong(endpoint.getName());
 
         // update encountered nodes
         if (encounteredNodes.containsKey(encounteredId)) {
@@ -603,6 +637,10 @@ public class DisseminationService extends Service {
         Toast.makeText(this, "Disconnected: " + endpoint, Toast.LENGTH_SHORT).show();
         setState(State.SEARCHING);
 
+        updateDurationOfContact(endpoint);
+    }
+
+    private void updateDurationOfContact(Long endpoint) {
         // update duration of contact
         if (encounteredNodes.containsKey(endpoint)) {
             ContactInfo contactInfo = encounteredNodes.get(endpoint);
@@ -648,14 +686,20 @@ public class DisseminationService extends Service {
      */
     protected void onReceiveHistory(@NotNull Endpoint endpoint, @NotNull Payload payload) {
         Log.d("[NEARBY]", "Endpoint " + endpoint.getId() + " sent us their history.");
+//        History history = History.parseFrom(payload.asBytes());
+
+
         if (payload.getType() == Payload.Type.BYTES) {
             try {
                 History history = History.parseFrom(payload.asBytes());
+
+                Log.i("[NEARBY HISTORY]", history.toString());
                 // update interests encounters based on the data we received
-                encounterInterests(history, Long.parseLong(endpoint.getId()));
+                encounterInterests(history, Long.parseLong(endpoint.getName()));
 
                 // compute aggregation weight <common topics, aggregation weight>
-                Pair<Double, Double> utility = computeAggregationWeight(history, Long.parseLong(endpoint.getId()));
+                Pair<Double, Double> utility = computeAggregationWeight(history, Long.parseLong(endpoint.getName()));
+                Log.i("[NEARBY HISTORY]", utility.second.toString());
 
                 if (utility.second != 0) {
                     // aggregate social network - if weight is 0, avoid unnecessary operations
@@ -902,15 +946,16 @@ public class DisseminationService extends Service {
      * @param history their view of the network at the moment of connection
      */
     private void sendMessages(@NotNull Endpoint endpoint, History history) {
-        Long userId = Long.parseLong(endpoint.getId());
+        Long userId = Long.parseLong(endpoint.getName());
 
-        for (MessageObject message : messages) {
+        for (MessageObject message : ownMessages) {
             if (interested(message, history, userId)
                     || interestedFriends(message, history, userId)
                     || interestsEncountered(message, history)) {
                 // at least one topic mandatory, so verifications must be made before building the message
                 MessageExch.Builder messagePayload = MessageExch.newBuilder()
                         .setSource(message.getSource())
+                        .setContent(message.getContent())
                         .setTimestamp(message.getTimestamp())
                         .setTopic1(message.getTopic1());
 
@@ -923,6 +968,31 @@ public class DisseminationService extends Service {
 
                 // send message to the other node
                 send(Payload.fromBytes(messagePayload.build().toByteArray()), endpoint.getId());
+            }
+        }
+
+        for (MessageObject message : messages) {
+            if (message.getSource() != Long.parseLong(endpoint.getName())) {
+                if (interested(message, history, userId)
+                        || interestedFriends(message, history, userId)
+                        || interestsEncountered(message, history)) {
+                    // at least one topic mandatory, so verifications must be made before building the message
+                    MessageExch.Builder messagePayload = MessageExch.newBuilder()
+                            .setSource(message.getSource())
+                            .setContent(message.getContent())
+                            .setTimestamp(message.getTimestamp())
+                            .setTopic1(message.getTopic1());
+
+                    if (message.getTopic2() != null) {
+                        messagePayload.setTopic2(message.getTopic2());
+                    }
+                    if (message.getTopic3() != null) {
+                        messagePayload.setTopic3(message.getTopic3());
+                    }
+
+                    // send message to the other node
+                    send(Payload.fromBytes(messagePayload.build().toByteArray()), endpoint.getId());
+                }
             }
         }
     }
@@ -1051,8 +1121,35 @@ public class DisseminationService extends Service {
         if (payload.getType() == Payload.Type.BYTES) {
             try {
                 MessageExch message = MessageExch.parseFrom(payload.asBytes());
+                MessageObject messageObject = new MessageObject(
+                        message.getSource(),
+                        message.getContent(),
+                        message.getTopic1(),
+                        message.getTopic2(),
+                        message.getTopic3(),
+                        message.getTimestamp());
+                messages.add(messageObject);
 
-                // TODO aici adaug mesajul in baza de date si in lista utilizatorului
+                AsyncTask.execute( () ->
+                    AppDatabase.getInstance(getApplicationContext()).messageDAO().insert(messageObject));
+
+                Set<Integer> ownInterests = socialNetwork.get(Long.parseLong(getName()));
+                if (ownInterests != null) {
+                    if (ownInterests.contains(messageObject.getTopic1())
+                            || ownInterests.contains(messageObject.getTopic2())
+                            || ownInterests.contains(messageObject.getTopic3())) {
+                        // send notification to UI and add in ISUser
+                        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "tittle-tattle")
+                                .setSmallIcon(R.drawable.ic_stat_name)
+                                .setContentTitle("Tittle-Tattle")
+                                .setContentText(messageObject.getContent())
+                                .setStyle(new NotificationCompat.BigTextStyle()
+                                        .bigText(messageObject.getContent()))
+                                .setAutoCancel(true)
+                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                        NotificationManagerCompat.from(this).notify(1, builder.build());
+                    }
+                }
 
             } catch (InvalidProtocolBufferException e) {
                 Log.w("[NEARBY]", "Invalid payload from endpoint " + endpoint.getId());

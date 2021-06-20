@@ -20,32 +20,32 @@ public interface MessageExchOrBuilder extends
   long getTimestamp();
 
   /**
-   * <code>int32 topic1 = 3;</code>
+   * <code>string content = 3;</code>
+   * @return The content.
+   */
+  java.lang.String getContent();
+  /**
+   * <code>string content = 3;</code>
+   * @return The bytes for content.
+   */
+  com.google.protobuf.ByteString
+      getContentBytes();
+
+  /**
+   * <code>int32 topic1 = 4;</code>
    * @return The topic1.
    */
   int getTopic1();
 
   /**
-   * <code>int32 topic2 = 4;</code>
+   * <code>int32 topic2 = 5;</code>
    * @return The topic2.
    */
   int getTopic2();
 
   /**
-   * <code>int32 topic3 = 5;</code>
+   * <code>int32 topic3 = 6;</code>
    * @return The topic3.
    */
   int getTopic3();
-
-  /**
-   * <code>string content = 6;</code>
-   * @return The content.
-   */
-  java.lang.String getContent();
-  /**
-   * <code>string content = 6;</code>
-   * @return The bytes for content.
-   */
-  com.google.protobuf.ByteString
-      getContentBytes();
 }

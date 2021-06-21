@@ -30,18 +30,23 @@ public class MessageObject {
     @NonNull
     private final Long timestamp;
 
+    @NonNull
+    private Boolean interested;
+
     @Ignore
     public MessageObject(@NonNull Long source,
                          @NonNull String content,
                          @NonNull Integer topic1,
                          @Nullable Integer topic2,
-                         @Nullable Integer topic3) {
+                         @Nullable Integer topic3,
+                         @NonNull Boolean interested) {
         this.content = content;
         this.source = source;
         this.topic1 = topic1;
         this.topic2 = topic2;
         this.topic3 = topic3;
         this.timestamp = System.currentTimeMillis();
+        this.interested = interested;
     }
 
     public MessageObject(@NonNull Long source,
@@ -58,11 +63,12 @@ public class MessageObject {
         this.timestamp = timestamp;
     }
 
+    @NotNull
     public Integer getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(@NotNull Integer id) {
         this.id = id;
     }
 
@@ -92,6 +98,16 @@ public class MessageObject {
     @NotNull
     public Long getTimestamp() {
         return timestamp;
+    }
+
+
+    @NonNull
+    public Boolean getInterested() {
+        return interested;
+    }
+
+    public void setInterested(@NonNull Boolean interested) {
+        this.interested = interested;
     }
 
     @Override

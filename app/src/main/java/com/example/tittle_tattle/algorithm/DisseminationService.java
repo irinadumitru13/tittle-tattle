@@ -1128,16 +1128,14 @@ public class DisseminationService extends Service {
                         message.getTopic2(),
                         message.getTopic3(),
                         message.getTimestamp());
-                messages.add(messageObject);
-
-                AsyncTask.execute( () ->
-                    AppDatabase.getInstance(getApplicationContext()).messageDAO().insert(messageObject));
 
                 Set<Integer> ownInterests = socialNetwork.get(Long.parseLong(getName()));
                 if (ownInterests != null) {
                     if (ownInterests.contains(messageObject.getTopic1())
                             || ownInterests.contains(messageObject.getTopic2())
                             || ownInterests.contains(messageObject.getTopic3())) {
+                        messageObject.setInterested(true);
+
                         // send notification to UI and add in ISUser
                         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "tittle-tattle")
                                 .setSmallIcon(R.drawable.ic_stat_name)
@@ -1148,8 +1146,20 @@ public class DisseminationService extends Service {
                                 .setAutoCancel(true)
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
                         NotificationManagerCompat.from(this).notify(1, builder.build());
+                    } else {
+                        messageObject.setInterested(false);
                     }
+                } else {
+                    messageObject.setInterested(false);
                 }
+
+                AsyncTask.execute( () -> {
+                    if (!messages.contains(messageObject)) {
+                        AppDatabase.getInstance(getApplicationContext()).messageDAO().insert(messageObject);
+                    }
+                });
+
+                messages.add(messageObject);
 
             } catch (InvalidProtocolBufferException e) {
                 Log.w("[NEARBY]", "Invalid payload from endpoint " + endpoint.getId());

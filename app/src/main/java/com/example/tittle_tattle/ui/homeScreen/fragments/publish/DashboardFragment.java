@@ -123,7 +123,8 @@ public class DashboardFragment extends Fragment {
                                 content,
                                 topics.get(0),
                                 1 < topics.size() ? topics.get(1) : null,
-                                2 < topics.size() ? topics.get(2): null);
+                                2 < topics.size() ? topics.get(2): null,
+                                false);
 
                         AppDatabase.getInstance(view.getContext()).publishMessage(message);
                         DisseminationService.addMessage(message);

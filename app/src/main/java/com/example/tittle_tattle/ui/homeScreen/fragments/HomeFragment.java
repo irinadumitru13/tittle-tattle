@@ -45,16 +45,12 @@ public class HomeFragment extends Fragment {
         Button my_subs_btn = view.findViewById(R.id.btn_interests);
         my_subs_btn.setPaintFlags(my_subs_btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
-        my_subs_btn.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_subscriptions);
-        });
+        my_subs_btn.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_subscriptions));
 
         Button topics_btn = view.findViewById(R.id.btn_topics);
         topics_btn.setPaintFlags(topics_btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
-        topics_btn.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_topics);
-        });
+        topics_btn.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_navigation_home_to_topics));
 
         Button messages_btn = view.findViewById(R.id.btn_pub_msg);
         messages_btn.setPaintFlags(topics_btn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);

@@ -36,6 +36,8 @@
     <string name="no_topics_text2">Subscriptions needed for publishing messages.</string>
     <string name="publish_image">Publish image</string>
     <string name="my_published_messages">My published messages</string>
+    <string name="login_text">For a better user experience, please connect with your facebook account. We will work on offering other login options in the future.</string>
+    <string name="gossip_text">because gossip always has the hottest information available</string>
 
     <string-array name="categories_resources" translatable="false">
         <item>area_of_activity</item>

@@ -32,10 +32,6 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//        View decorView = getWindow().getDecorView();
-//        int uiOptions = View.SYSTEM_UI_FLAG_IMMERSIVE | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-//        decorView.setSystemUiVisibility(uiOptions);
-
         Intent intent = getIntent();
         String serializedAccessToken = intent.getStringExtra("access_token");
         AccessToken accessToken = new Gson().fromJson(serializedAccessToken, AccessToken.class);
@@ -44,6 +40,7 @@ public class HomeActivity extends AppCompatActivity {
 
         sharedViewModel.setAccessToken(accessToken);
         sharedViewModel.updateSubscriptions();
+        sharedViewModel.getFriends();
 
         binding = ActivityHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -71,15 +68,6 @@ public class HomeActivity extends AppCompatActivity {
             Intent intentLogIn = new Intent(getBaseContext(), LoginActivity.class);
             startActivity(intentLogIn);
         });
-        //
-//        // get pages of authenticated user
-//        new GraphRequest(
-//                accessToken,
-//                "/" + accessToken.getUserId() + "/likes",
-//                null,
-//                HttpMethod.GET,
-//                response -> Log.i("[GRAPH API] likes", response.getRawResponse())
-//        ).executeAsync();
     }
 
 

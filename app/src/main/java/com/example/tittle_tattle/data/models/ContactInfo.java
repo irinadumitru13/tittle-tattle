@@ -3,18 +3,20 @@ package com.example.tittle_tattle.data.models;
 import androidx.annotation.NonNull;
 import androidx.room.Ignore;
 
+import org.jetbrains.annotations.NotNull;
+
 public class ContactInfo {
     @NonNull
-    private int contacts;
+    private Integer contacts;
     @NonNull
-    private long duration;
+    private Long duration;
     @NonNull
-    private long lastEncounterTime;
+    private Long lastEncounterTime;
 
     @Ignore
-    public ContactInfo(long lastEncounterTime) {
+    public ContactInfo(@NotNull Long lastEncounterTime) {
         this.contacts = 1;
-        this.duration = 0;
+        this.duration = 0L;
         this.lastEncounterTime = lastEncounterTime;
     }
 

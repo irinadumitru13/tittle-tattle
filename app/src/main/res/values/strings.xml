@@ -3,6 +3,7 @@
 
     <string name="facebook_app_id">4508518975843277</string>
     <string name="fb_login_protocol_scheme">fb4508518975843277</string>
+    <string name="facebook_client_token">3c7ff058d30995da75d60506c56a8197</string>
 
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_home">Home</string>
@@ -29,15 +30,16 @@
     <string name="topics">Topics</string>
     <string name="empty_rec">No subscriptions.</string>
     <string name="empty_image">Empty image</string>
-    <string name="go_to_topics_for_more">Go to topics for more.</string>
+    <string name="go_to_topics_for_more">For more, go to</string>
     <string name="message_hint">message</string>
     <string name="publish_btn">publish</string>
-    <string name="no_topics_text1">You aren\'t subscribed to any topics.</string>
+    <string name="no_topics_text1">You aren\'t subscribed to any </string>
     <string name="no_topics_text2">Subscriptions needed for publishing messages.</string>
     <string name="publish_image">Publish image</string>
-    <string name="my_published_messages">My published messages</string>
     <string name="login_text">For a better user experience, please connect with your facebook account. We will work on offering other login options in the future.</string>
     <string name="gossip_text">because gossip always has the hottest information available</string>
+    <string name="topics_in_text">topics</string>
+    <string name="my_ads">My ads</string>
 
     <string-array name="categories_resources" translatable="false">
         <item>area_of_activity</item>
@@ -205,5 +207,13 @@
         <item>Tennis</item>
         <item>Yoga</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="permissions">Permissions</string>
+    <string name="are_not_granted">are not granted.</string>
+    <string name="usage_of_location_all_the_time">(usage of location all the time)</string>
+    <string name="no_notifications_image">No notifications image</string>
+    <string name="notifications">Notifications</string>
+    <string name="no_notifications">No notifications.</string>
 
 </resources>

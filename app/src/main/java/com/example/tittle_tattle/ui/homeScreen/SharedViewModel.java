@@ -14,7 +14,7 @@ import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.SocialNetworkObject;
 import com.example.tittle_tattle.data.models.Subscription;
 import com.example.tittle_tattle.data.models.User;
-import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topics.models.Subcategory;
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.HttpMethod;
@@ -24,7 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -92,7 +92,7 @@ public class SharedViewModel extends AndroidViewModel {
                             Long id = Long.parseLong(((JSONObject)friends.get(i)).get("id").toString());
 
                             AsyncTask.execute(() ->
-                                database.socialNetworkDAO().insert(new SocialNetworkObject(id, null)));
+                                database.socialNetworkDAO().insert(new SocialNetworkObject(id, new HashSet<>())));
                         }
                     } catch (Exception e) {
                         Log.e("[GRAPH API] exception", e.getMessage());
@@ -149,9 +149,6 @@ public class SharedViewModel extends AndroidViewModel {
                     }
                 ).executeAsync();
             }
-
-            ISUser.getUser().setFullName(state.get("full_name"));
-            ISUser.getUser().setId(Long.parseLong(accessToken.getUserId()));
         }
     }
 

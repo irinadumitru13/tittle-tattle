@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.navigation.NavDeepLinkBuilder;
 
 import com.example.tittle_tattle.R;
 import com.example.tittle_tattle.algorithm.proto.Contact;
@@ -37,6 +38,7 @@ import com.example.tittle_tattle.data.models.EncounteredInterestsObject;
 import com.example.tittle_tattle.data.models.EncounteredNodesObject;
 import com.example.tittle_tattle.data.models.MessageObject;
 import com.example.tittle_tattle.data.models.SocialNetworkObject;
+import com.example.tittle_tattle.ui.homeScreen.HomeActivity;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.connection.AdvertisingOptions;
@@ -61,6 +63,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -81,6 +84,7 @@ import java.util.stream.Collectors;
  * down the volume keys and speaking into the phone. Advertising and discovery have both stopped.
  */
 public class DisseminationService extends Service {
+    public static boolean active = false;
     private ServiceHandler serviceHandler;
     /** Our handler to Nearby Connections. */
     private ConnectionsClient mConnectionsClient;
@@ -128,40 +132,47 @@ public class DisseminationService extends Service {
     private final double w1 = 0.25, w2 = 0.25, w3 = 0.25, w4 = 0.25;
 
     /** Social network threshold. */
-    private double socialNetworkThreshold = 0.5;
+    private final double socialNetworkThreshold = 0.5;
     /** Interest threshold. */
-    private double interestThreshold = 0.1;
+    private final double interestThreshold = 0.1;
     /** Contacts threshold. */
-    private int contactsThreshold = 100;
+    private final int contactsThreshold = 100;
     /** Interested friends threshold - for ONSIDE algorithm */
-    private int interestedFriendsThreshold = 1;
+    private final int interestedFriendsThreshold = 1;
     /** Encountered interests threshold - for ONSIDE algorithm */
-    private double encounteredInterestsThreshold = 1.0;
+    private final double encounteredInterestsThreshold = 0.7;
 
     /** How many contacts has this node made. */
     private long encounters = 0;
 
     /** List of nodes encountered by the current node during a time window. */
-    private Map<Long, ContactInfo> encounteredNodes;
+    private final Map<Long, ContactInfo> encounteredNodes = new HashMap<>();
     /** Social network - user id with their interests */
-    private static Map<Long, Set<Integer>> socialNetwork;
+    private static final Map<Long, Set<Integer>> socialNetwork = new HashMap<>();
     /** Interests */
-    private Map<Integer, Long> encounteredInterests;
+    private final Map<Integer, Long> encounteredInterests = new HashMap<>();
 
     /** Messages published by this node. */
-    private static final Set<MessageObject> ownMessages = new HashSet<>();
+    private static final LinkedList<MessageObject> ownMessages = new LinkedList<>();
     /** Messages received from other nodes. */
-    private Set<MessageObject> messages;
+    private static final Set<MessageObject> messages = new LinkedHashSet<>();
 
     public static void addMessage(MessageObject message) {
-        ownMessages.add(message);
+        ownMessages.addFirst(message);
     }
 
-    private static Set<MessageObject> getOwnMessages() {
+    @NotNull
+    public static List<MessageObject> getOwnMessages() {
         return ownMessages;
     }
 
-    private static void addInterest(long userId, int interest) {
+    @NotNull
+    @Contract(" -> new")
+    public static List<MessageObject> getNotifications() {
+        return new ArrayList<>(messages);
+    }
+
+    protected static void addInterest(long userId, int interest) {
         Set<Integer> interests;
         if (socialNetwork.get(userId) == null) {
             interests = new HashSet<>();
@@ -177,7 +188,7 @@ public class DisseminationService extends Service {
         socialNetwork.put(userId, interests);
     }
 
-    private static void deleteInterest(long userId, int interest) {
+    protected static void deleteInterest(long userId, int interest) {
         if (socialNetwork.containsKey(userId)) {
             Set<Integer> interests = socialNetwork.get(userId);
 
@@ -190,8 +201,8 @@ public class DisseminationService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        active = true;
         startService();
-        Log.i("[NEARBY]", "Service onCreate()");
 
         HandlerThread thread = new HandlerThread("ServiceStartArguments",
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -212,14 +223,14 @@ public class DisseminationService extends Service {
             long userId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong("user_id", 0);
             mName = String.valueOf(userId);
 
-            messages = new LinkedHashSet<>(db.messageDAO().findAllExceptUserId(userId));
+            messages.addAll(db.messageDAO().findAllExceptUserId(userId));
             ownMessages.addAll(db.messageDAO().findAllByUserId(userId));
 
-            socialNetwork = (db.socialNetworkDAO().findAll()).stream().collect(Collectors.toMap(SocialNetworkObject::getId, SocialNetworkObject::getInterests));
+            socialNetwork.putAll((db.socialNetworkDAO().findAll().stream().collect(Collectors.toMap(SocialNetworkObject::getId, SocialNetworkObject::getInterests))));
             socialNetwork.put(userId, ISUser.getUser().getTopics());
 
-            encounteredNodes = (db.encounteredNodesDAO().findAll().stream().collect(Collectors.toMap(EncounteredNodesObject::getUserId, EncounteredNodesObject::getContactInfo)));
-            encounteredInterests = (db.encounteredInterestsDAO().findAll().stream().collect(Collectors.toMap(EncounteredInterestsObject::getId, EncounteredInterestsObject::getTimes)));
+            encounteredNodes.putAll((db.encounteredNodesDAO().findAll().stream().collect(Collectors.toMap(EncounteredNodesObject::getUserId, EncounteredNodesObject::getContactInfo))));
+            encounteredInterests.putAll((db.encounteredInterestsDAO().findAll().stream().collect(Collectors.toMap(EncounteredInterestsObject::getId, EncounteredInterestsObject::getTimes))));
 
             mConnectionsClient = Nearby.getConnectionsClient(getApplicationContext());
             setState(State.SEARCHING);
@@ -229,7 +240,6 @@ public class DisseminationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Toast.makeText(this, "tittle-tattle service starting", Toast.LENGTH_SHORT).show();
         android.os.Message message = serviceHandler.obtainMessage();
         message.arg1 = startId;
         serviceHandler.sendMessage(message);
@@ -247,7 +257,7 @@ public class DisseminationService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Toast.makeText(this, "tittle-tattle service done", Toast.LENGTH_SHORT).show();
-        // TODO put data in db
+        // TODO put data in db or at least try to
         if (mConnectionsClient != null) {
             stopAllEndpoints();
         }
@@ -284,9 +294,6 @@ public class DisseminationService extends Service {
         new ConnectionLifecycleCallback() {
             @Override
             public void onConnectionInitiated(@NotNull String endpointId, @NotNull ConnectionInfo connectionInfo) {
-                Log.i("[NEARBY]", String.format("onConnectionInitiated(endpointId=%s, endpointName=%s)",
-                                                    endpointId, connectionInfo.getEndpointName()));
-
                 Endpoint endpoint = new Endpoint(endpointId, connectionInfo.getEndpointName());
                 mPendingConnections.put(endpointId, endpoint);
 
@@ -295,8 +302,6 @@ public class DisseminationService extends Service {
 
             @Override
             public void onConnectionResult(@NotNull String endpointId, @NotNull ConnectionResolution result) {
-                Log.i("[NEARBY]", String.format("onConnectionResponse(endpointId=%s, result=%s)", endpointId, result));
-                // We're no longer connecting
                 mIsConnecting = false;
 
                 if (!result.getStatus().isSuccess()) {
@@ -327,9 +332,6 @@ public class DisseminationService extends Service {
         new EndpointDiscoveryCallback() {
             @Override
             public void onEndpointFound(@NotNull String endpointId, @NotNull DiscoveredEndpointInfo info) {
-                Log.d("[NEARBY]", String.format("onEndpointFound(endpointId=%s, serviceId=%s, endpointName=%s)",
-                        endpointId, info.getServiceId(), info.getEndpointName()));
-
                 if (getServiceId().equals(info.getServiceId())) {
                     Endpoint endpoint = new Endpoint(endpointId, info.getEndpointName());
                     mDiscoveredEndpoints.put(endpointId, endpoint);
@@ -340,7 +342,6 @@ public class DisseminationService extends Service {
 
             @Override
             public void onEndpointLost(@NotNull String endpointId) {
-                Log.d("[NEARBY]", String.format("onEndpointLost(endpointId=%s)", endpointId));
                 mDiscoveredEndpoints.remove(endpointId);
             }
         };
@@ -350,15 +351,11 @@ public class DisseminationService extends Service {
         new PayloadCallback() {
             @Override
             public void onPayloadReceived(@NotNull String endpointId, @NotNull Payload payload) {
-                Log.d("[NEARBY]", String.format("onPayloadReceived(endpointId=%s, payload=%s)", endpointId, payload));
-
-                // received their history
                 if (mHistoryExchangeConnections.containsKey(endpointId)) {
                     mMessageExchangeConnections.put(endpointId, mHistoryExchangeConnections.remove(endpointId));
 
                     onReceiveHistory(Objects.requireNonNull(mMessageExchangeConnections.get(endpointId)), payload);
                 } else if (mMessageExchangeConnections.containsKey(endpointId)) {
-                    Log.i("[NEARBY MESSAGES]", "Message received");
 
                     onReceiveMessage(mMessageExchangeConnections.get(endpointId), payload);
                 } else {
@@ -480,7 +477,6 @@ public class DisseminationService extends Service {
      * #connectToEndpoint(Endpoint)}.
      */
     protected void onEndpointDiscovered(Endpoint endpoint) {
-        stopDiscovering();
         connectToEndpoint(endpoint);
     }
 
@@ -515,6 +511,7 @@ public class DisseminationService extends Service {
         mDiscoveredEndpoints.clear();
         mPendingConnections.clear();
         mHistoryExchangeConnections.clear();
+        mMessageExchangeConnections.clear();
     }
 
     /**
@@ -523,7 +520,6 @@ public class DisseminationService extends Service {
      * if we successfully reached the device.
      */
     protected void connectToEndpoint(@NotNull final Endpoint endpoint) {
-        Log.v("[NEARBY]", "Sending a connection request to endpoint " + endpoint);
         // Mark ourselves as connecting so we don't connect multiple times
         mIsConnecting = true;
 
@@ -531,13 +527,11 @@ public class DisseminationService extends Service {
         mConnectionsClient.requestConnection(getName(), endpoint.getId(), mConnectionLifecycleCallback)
             .addOnSuccessListener(unusedResult -> {
                 Log.i("[NEARBY]","Connected to endpoint: " + endpoint.getId());
-
                 connectedToEndpoint(endpoint);
             })
 
             .addOnFailureListener(e -> {
                 Log.w("[NEARBY]", "requestConnection() failed. ", e);
-
                 mIsConnecting = false;
                 onConnectionFailed(endpoint);
             });
@@ -549,8 +543,6 @@ public class DisseminationService extends Service {
     }
 
     private void connectedToEndpoint(Endpoint endpoint) {
-        Log.i("[NEARBY]", String.format("connectedToEndpoint(endpoint=%s)", endpoint));
-
         // how many connections happened until now
         encounters++;
         // just connected, first we got to send history to this node
@@ -591,11 +583,7 @@ public class DisseminationService extends Service {
 
     /** Called when someone has connected to us. */
     protected void onEndpointConnected(@NotNull Endpoint endpoint) {
-        Toast.makeText(this, "Connected: " + endpoint.getName(), Toast.LENGTH_SHORT).show();
         setState(State.CONNECTED);
-
-        // this is the first message when someone connected to us
-        // compose HistoryPayload
 
         // create EncounteredNodes payload
         Map<Long, Contact> encounters = new HashMap<>();
@@ -634,7 +622,6 @@ public class DisseminationService extends Service {
 
     /** Called when someone has disconnected. */
     protected void onEndpointDisconnected(@NotNull Long endpoint) {
-        Toast.makeText(this, "Disconnected: " + endpoint, Toast.LENGTH_SHORT).show();
         setState(State.SEARCHING);
 
         updateDurationOfContact(endpoint);
@@ -685,21 +672,14 @@ public class DisseminationService extends Service {
      * @param payload The data.
      */
     protected void onReceiveHistory(@NotNull Endpoint endpoint, @NotNull Payload payload) {
-        Log.d("[NEARBY]", "Endpoint " + endpoint.getId() + " sent us their history.");
-//        History history = History.parseFrom(payload.asBytes());
-
-
         if (payload.getType() == Payload.Type.BYTES) {
             try {
                 History history = History.parseFrom(payload.asBytes());
-
-                Log.i("[NEARBY HISTORY]", history.toString());
                 // update interests encounters based on the data we received
                 encounterInterests(history, Long.parseLong(endpoint.getName()));
 
                 // compute aggregation weight <common topics, aggregation weight>
                 Pair<Double, Double> utility = computeAggregationWeight(history, Long.parseLong(endpoint.getName()));
-                Log.i("[NEARBY HISTORY]", utility.second.toString());
 
                 if (utility.second != 0) {
                     // aggregate social network - if weight is 0, avoid unnecessary operations
@@ -1141,11 +1121,15 @@ public class DisseminationService extends Service {
                                 .setSmallIcon(R.drawable.ic_stat_name)
                                 .setContentTitle("Tittle-Tattle")
                                 .setContentText(messageObject.getContent())
-                                .setStyle(new NotificationCompat.BigTextStyle()
-                                        .bigText(messageObject.getContent()))
                                 .setAutoCancel(true)
+                                .setDeleteIntent(
+                                        new NavDeepLinkBuilder(getApplicationContext())
+                                            .setComponentName(HomeActivity.class)
+                                            .setGraph(R.navigation.mobile_navigation)
+                                            .setDestination(R.id.navigation_notifications)
+                                            .createPendingIntent())
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                        NotificationManagerCompat.from(this).notify(1, builder.build());
+                        NotificationManagerCompat.from(this).notify(2, builder.build());
                     } else {
                         messageObject.setInterested(false);
                     }

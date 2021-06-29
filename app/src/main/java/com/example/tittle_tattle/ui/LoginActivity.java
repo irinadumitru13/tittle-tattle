@@ -27,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences sharedPreferences;
 
     private final List<String> permissions = new ArrayList<String>(){{
+            add("public_profile");
             add("email");
             add("user_friends");
             add("user_likes");

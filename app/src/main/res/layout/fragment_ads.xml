@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.homeScreen.fragments.subscriptions.SubscriptionsFragment">
+    tools:context=".ui.homeScreen.fragments.ads.AdsFragment">
 
     <TextView
-        android:id="@+id/textViewSubscriptions"
+        android:id="@+id/textViewAds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:fontFamily="@font/gruppo"
-        android:text="@string/my_subscriptions"
+        android:text="@string/my_ads"
         android:textAlignment="viewStart"
         android:textColor="#000000"
         android:textSize="34sp"
@@ -28,61 +28,55 @@
         app:layout_constraintVertical_bias="0.050000012" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/subscriptionsRecView"
+        android:id="@+id/adsRecView"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="598dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewSubscriptions" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewAds"
+        app:layout_constraintVertical_bias="0.0" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/emptyRec"
-        android:layout_width="375dp"
-        android:layout_height="711dp"
+        android:id="@+id/emptyAdsRec"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="@+id/subscriptionsRecView"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewSubscriptions"
+        app:layout_constraintTop_toBottomOf="@+id/textViewAds"
         app:layout_constraintVertical_bias="0.0">
 
-        <TextView
-            android:id="@+id/topicsText"
-            android:layout_width="wrap_content"
+        <ImageView
+            android:id="@+id/emptyImage"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:fontFamily="@font/catamaran_light"
-            android:letterSpacing="0.1"
-            android:text="@string/go_to_topics_for_more"
-            android:textAlignment="viewStart"
-            android:textColor="#000000"
-            android:textSize="20sp"
-            android:textStyle="normal"
+            android:contentDescription="@string/empty_image"
+            android:src="@drawable/empty"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emptyText"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
         <Button
-            android:id="@+id/btn_top"
+            android:id="@+id/btn_permissions"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#e9ecef"
             android:clickable="true"
             android:focusable="true"
             android:fontFamily="@font/catamaran_light"
             android:letterSpacing="0.1"
-            android:text="@string/topics_in_text"
+            android:text="@string/permissions"
             android:textAlignment="textStart"
             android:textAllCaps="false"
             android:textColor="#000000"
@@ -90,45 +84,83 @@
             android:textStyle="normal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.08"
-            app:layout_constraintStart_toEndOf="@+id/topicsText"
-            app:layout_constraintTop_toTopOf="@+id/emptyImage"
-            app:layout_constraintVertical_bias="0.64" />
-
-        <ImageView
-            android:id="@+id/emptyImage"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:contentDescription="@string/empty_image"
-            android:src="@drawable/no_subscriptions"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.775" />
 
         <TextView
-            android:id="@+id/emptyText"
+            android:id="@+id/textViewNoPermissionsAds2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
             android:fontFamily="@font/catamaran_light"
             android:letterSpacing="0.1"
-            android:text="@string/empty_rec"
-            android:textAlignment="viewStart"
+            android:text="@string/are_not_granted"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/btn_permissions"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.768" />
+
+        <TextView
+            android:id="@+id/textViewPermissionsAds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/catamaran_light"
+            android:letterSpacing="0.1"
+            android:text="@string/usage_of_location_all_the_time"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.20"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/btn_permissions"
+            app:layout_constraintVertical_bias="0.0" />
+
+
+        <Button
+            android:id="@+id/btn_publish_ads"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/catamaran_light"
+            android:letterSpacing="0.1"
+            android:text="Publish."
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
             android:textColor="#000000"
             android:textSize="20sp"
             android:textStyle="normal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/textViewNoAds"
+            app:layout_constraintTop_toTopOf="@+id/emptyImage"
+            app:layout_constraintVertical_bias="0.81" />
+
+        <TextView
+            android:id="@+id/textViewNoAds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:fontFamily="@font/catamaran_light"
+            android:letterSpacing="0.1"
+            android:text="No ads."
+            android:textColor="#000000"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.59" />
+            app:layout_constraintVertical_bias="0.802" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>

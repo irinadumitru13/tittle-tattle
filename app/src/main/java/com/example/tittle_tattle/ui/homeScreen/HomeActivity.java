@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,7 +14,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
 import com.example.tittle_tattle.R;
-import com.example.tittle_tattle.algorithm.DisseminationService;
+import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.databinding.ActivityHomeBinding;
 import com.example.tittle_tattle.ui.LoginActivity;
 import com.facebook.AccessToken;
@@ -35,6 +34,8 @@ public class HomeActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String serializedAccessToken = intent.getStringExtra("access_token");
         AccessToken accessToken = new Gson().fromJson(serializedAccessToken, AccessToken.class);
+
+        ISUser.getUser().setId(Long.parseLong(accessToken.getUserId()));
 
         SharedViewModel sharedViewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
@@ -69,7 +70,5 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(intentLogIn);
         });
     }
-
-
 
 }

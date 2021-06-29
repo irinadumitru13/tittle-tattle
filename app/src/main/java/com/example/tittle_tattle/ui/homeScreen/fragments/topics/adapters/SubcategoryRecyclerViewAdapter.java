@@ -1,4 +1,4 @@
-package com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.adapters;
+package com.example.tittle_tattle.ui.homeScreen.fragments.topics.adapters;
 
 import android.graphics.Paint;
 import android.os.AsyncTask;
@@ -16,7 +16,7 @@ import com.example.tittle_tattle.R;
 import com.example.tittle_tattle.algorithm.ISUser;
 import com.example.tittle_tattle.data.AppDatabase;
 import com.example.tittle_tattle.data.models.Subscription;
-import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topics.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
 

@@ -1,4 +1,4 @@
-package com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.adapters;
+package com.example.tittle_tattle.ui.homeScreen.fragments.topics.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tittle_tattle.R;
-import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Category;
-import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topics.models.Category;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topics.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
 

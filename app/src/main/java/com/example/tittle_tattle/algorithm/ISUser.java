@@ -1,10 +1,9 @@
 package com.example.tittle_tattle.algorithm;
 
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.example.tittle_tattle.data.models.Subscription;
-import com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models.Subcategory;
+import com.example.tittle_tattle.ui.homeScreen.fragments.topics.models.Subcategory;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +17,6 @@ public class ISUser {
     private static ISUser ISUser;
 
     private Long id;
-
-    private String fullName;
 
     private final SparseArray<String> mySubscriptions;
 
@@ -86,7 +83,6 @@ public class ISUser {
     }
 
     public void subscribe(@NotNull Subcategory subcategory) {
-        Log.i("[SUBSCRIBE]", subcategory.getName());
         // no element of category already subscribed to
         if (categoryTopics.indexOfKey(subcategory.getCategoryId()) < 0) {
             categoryTopics.append(subcategory.getCategoryId(), new HashSet<Integer>(){{
@@ -99,10 +95,11 @@ public class ISUser {
         }
 
         mySubscriptions.put(subcategory.getSubcategoryId(), subcategory.getName());
+
+        DisseminationService.addInterest(getId(), subcategory.getSubcategoryId());
     }
 
     public void unsubscribe(@NotNull Subcategory subcategory) {
-        Log.i("[UNSUBSCRIBE]", subcategory.getName());
         HashSet<Integer> subcategories = categoryTopics.get(subcategory.getCategoryId());
         subcategories.remove(subcategory.getSubcategoryId());
 
@@ -111,6 +108,7 @@ public class ISUser {
         }
 
         mySubscriptions.delete(subcategory.getSubcategoryId());
+        DisseminationService.deleteInterest(getId(), subcategory.getSubcategoryId());
     }
 
     public Set<String> getSocialNetwork() {
@@ -119,13 +117,5 @@ public class ISUser {
 
     public void setSocialNetwork(ArrayList<String> friends) {
         this.socialNetwork.addAll(friends);
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
     }
 }

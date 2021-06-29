@@ -20,7 +20,7 @@ public interface MessageDAO {
     @Query("DELETE FROM messages WHERE id = :id")
     void deleteById(int id);
 
-    @Query("SELECT * FROM messages WHERE source = :user_id ORDER BY timestamp")
+    @Query("SELECT * FROM messages WHERE source = :user_id ORDER BY timestamp DESC")
     List<MessageObject> findAllByUserId(long user_id);
 
     @Query("SELECT * FROM messages WHERE source <> :user_id ORDER BY timestamp DESC")

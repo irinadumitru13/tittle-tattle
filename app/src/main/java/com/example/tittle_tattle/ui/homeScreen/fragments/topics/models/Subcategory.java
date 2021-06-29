@@ -1,4 +1,4 @@
-package com.example.tittle_tattle.ui.homeScreen.fragments.topicsRecycler.models;
+package com.example.tittle_tattle.ui.homeScreen.fragments.topics.models;
 
 public class Subcategory {
     private final String name;

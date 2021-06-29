@@ -5,7 +5,6 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 
-import com.example.tittle_tattle.algorithm.proto.SocialNetwork;
 import com.example.tittle_tattle.data.models.SocialNetworkObject;
 
 import java.util.List;

@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final Integer DELAY = 2000;
+    private final Integer DELAY = 2500;
 
     /**
      * These permissions are required before connecting to Nearby Connections. Only {@link

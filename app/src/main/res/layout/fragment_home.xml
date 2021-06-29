@@ -15,13 +15,14 @@
         android:layout_marginEnd="16dp"
         android:adjustViewBounds="true"
         android:contentDescription="@string/home_img_content_desc"
+        android:scaleY="0.8"
         android:src="@drawable/home"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.414" />
+        app:layout_constraintVertical_bias="0.412" />
 
     <TextView
         android:id="@+id/textView_welcome"
@@ -38,7 +39,7 @@
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.446" />
+        app:layout_constraintVertical_bias="0.581" />
 
     <TextView
         android:id="@+id/name_text"
@@ -75,8 +76,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView_home"
-        app:layout_constraintVertical_bias="0.255" />
+        app:layout_constraintTop_toTopOf="@+id/imageView_home"
+        app:layout_constraintVertical_bias="0.656" />
 
     <Button
         android:id="@+id/btn_pub_msg"
@@ -84,12 +85,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:letterSpacing="0.1"
         android:background="#e9ecef"
         android:clickable="true"
         android:focusable="true"
         android:fontFamily="@font/gruppo"
-        android:text="@string/my_published_messages"
+        android:letterSpacing="0.1"
+        android:text="@string/my_ads"
         android:textAlignment="textStart"
         android:textAllCaps="false"
         android:textColor="#000000"
@@ -109,10 +110,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:background="#e9ecef"
-        android:letterSpacing="0.1"
         android:clickable="true"
         android:focusable="true"
         android:fontFamily="@font/gruppo"
+        android:letterSpacing="0.1"
         android:text="@string/topics"
         android:textAlignment="textStart"
         android:textAllCaps="false"

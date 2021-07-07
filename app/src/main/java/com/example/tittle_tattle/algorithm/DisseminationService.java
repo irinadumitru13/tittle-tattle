@@ -85,6 +85,8 @@ import java.util.stream.Collectors;
  */
 public class DisseminationService extends Service {
     public static boolean active = false;
+
+    private int notification_id = 1;
     private ServiceHandler serviceHandler;
     /** Our handler to Nearby Connections. */
     private ConnectionsClient mConnectionsClient;
@@ -240,6 +242,7 @@ public class DisseminationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
+        active = true;
         android.os.Message message = serviceHandler.obtainMessage();
         message.arg1 = startId;
         serviceHandler.sendMessage(message);
@@ -256,7 +259,7 @@ public class DisseminationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this, "tittle-tattle service done", Toast.LENGTH_SHORT).show();
+        active = false;
         // TODO put data in db or at least try to
         if (mConnectionsClient != null) {
             stopAllEndpoints();
@@ -286,7 +289,7 @@ public class DisseminationService extends Service {
                         .setSmallIcon(R.drawable.ic_stat_name)
                         .setContentIntent(pendingIntent)
                         .build();
-        startForeground(1, notification);
+        startForeground(notification_id++, notification);
     }
 
     /** Callbacks for connections to other devices. */
@@ -296,7 +299,6 @@ public class DisseminationService extends Service {
             public void onConnectionInitiated(@NotNull String endpointId, @NotNull ConnectionInfo connectionInfo) {
                 Endpoint endpoint = new Endpoint(endpointId, connectionInfo.getEndpointName());
                 mPendingConnections.put(endpointId, endpoint);
-
                 DisseminationService.this.onConnectionInitiated(endpoint, connectionInfo);
             }
 
@@ -305,10 +307,7 @@ public class DisseminationService extends Service {
                 mIsConnecting = false;
 
                 if (!result.getStatus().isSuccess()) {
-                    Log.w("[NEARBY]", String.format("Connection failed. Received status %s.",
-                                                DisseminationService.toString(result.getStatus())));
-
-                    onConnectionFailed(mPendingConnections.remove(endpointId));
+                    mPendingConnections.remove(endpointId);
                     return;
                 }
 
@@ -319,7 +318,6 @@ public class DisseminationService extends Service {
             public void onDisconnected(@NotNull String endpointId) {
                 if (!mHistoryExchangeConnections.containsKey(endpointId) ||
                         !mMessageExchangeConnections.containsKey(endpointId)) {
-                    Log.i("[NEARBY]", "Unexpected disconnection from endpoint " + endpointId);
                     return;
                 }
 
@@ -520,20 +518,16 @@ public class DisseminationService extends Service {
      * if we successfully reached the device.
      */
     protected void connectToEndpoint(@NotNull final Endpoint endpoint) {
-        // Mark ourselves as connecting so we don't connect multiple times
         mIsConnecting = true;
 
         // Ask to connect
         mConnectionsClient.requestConnection(getName(), endpoint.getId(), mConnectionLifecycleCallback)
             .addOnSuccessListener(unusedResult -> {
-                Log.i("[NEARBY]","Connected to endpoint: " + endpoint.getId());
                 connectedToEndpoint(endpoint);
             })
 
             .addOnFailureListener(e -> {
-                Log.w("[NEARBY]", "requestConnection() failed. ", e);
                 mIsConnecting = false;
-                onConnectionFailed(endpoint);
             });
     }
 
@@ -1117,19 +1111,22 @@ public class DisseminationService extends Service {
                         messageObject.setInterested(true);
 
                         // send notification to UI and add in ISUser
-                        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "tittle-tattle")
-                                .setSmallIcon(R.drawable.ic_stat_name)
-                                .setContentTitle("Tittle-Tattle")
-                                .setContentText(messageObject.getContent())
-                                .setAutoCancel(true)
-                                .setDeleteIntent(
-                                        new NavDeepLinkBuilder(getApplicationContext())
-                                            .setComponentName(HomeActivity.class)
-                                            .setGraph(R.navigation.mobile_navigation)
-                                            .setDestination(R.id.navigation_notifications)
-                                            .createPendingIntent())
-                                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-                        NotificationManagerCompat.from(this).notify(2, builder.build());
+                        if (!messages.contains(messageObject)) {
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "tittle-tattle")
+                                    .setSmallIcon(R.drawable.ic_stat_name)
+                                    .setContentTitle("Tittle-Tattle")
+                                    .setContentText(messageObject.getContent())
+                                    .setOngoing(true)
+                                    .setAutoCancel(true)
+                                    .setContentIntent(
+                                            new NavDeepLinkBuilder(getApplicationContext())
+                                                    .setComponentName(HomeActivity.class)
+                                                    .setGraph(R.navigation.mobile_navigation)
+                                                    .setDestination(R.id.navigation_notifications)
+                                                    .createPendingIntent())
+                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                            NotificationManagerCompat.from(this).notify(notification_id++, builder.build());
+                        }
                     } else {
                         messageObject.setInterested(false);
                     }

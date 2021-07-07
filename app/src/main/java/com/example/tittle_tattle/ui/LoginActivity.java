@@ -61,7 +61,6 @@ public class LoginActivity extends AppCompatActivity {
                 editor.apply();
 
                 Intent intent = new Intent(getBaseContext(), HomeActivity.class);
-                intent.putExtra("access_token", serialized_token);
                 startActivity(intent);
             }
             @Override

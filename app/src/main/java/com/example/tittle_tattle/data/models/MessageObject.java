@@ -112,7 +112,7 @@ public class MessageObject {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        return this.getSource().hashCode() ^ this.timestamp.hashCode() ^ this.content.hashCode();
     }
 
     @Override

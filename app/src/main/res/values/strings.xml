@@ -28,9 +28,8 @@
     <string name="sports">Sports</string>
     <string name="others">Others</string>
     <string name="topics">Topics</string>
-    <string name="empty_rec">No subscriptions.</string>
+    <string name="empty_rec">No subscriptions. Go to</string>
     <string name="empty_image">Empty image</string>
-    <string name="go_to_topics_for_more">For more, go to</string>
     <string name="message_hint">message</string>
     <string name="publish_btn">publish</string>
     <string name="no_topics_text1">You aren\'t subscribed to any </string>
@@ -40,6 +39,12 @@
     <string name="gossip_text">because gossip always has the hottest information available</string>
     <string name="topics_in_text">topics</string>
     <string name="my_ads">My ads</string>
+    <string name="permissions">Permissions</string>
+    <string name="are_not_granted">are not granted.</string>
+    <string name="usage_of_location_all_the_time">(usage of location all the time)</string>
+    <string name="no_notifications_image">No notifications image</string>
+    <string name="notifications">Notifications</string>
+    <string name="no_notifications">No notifications.</string>
 
     <string-array name="categories_resources" translatable="false">
         <item>area_of_activity</item>
@@ -207,13 +212,4 @@
         <item>Tennis</item>
         <item>Yoga</item>
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="permissions">Permissions</string>
-    <string name="are_not_granted">are not granted.</string>
-    <string name="usage_of_location_all_the_time">(usage of location all the time)</string>
-    <string name="no_notifications_image">No notifications image</string>
-    <string name="notifications">Notifications</string>
-    <string name="no_notifications">No notifications.</string>
-
 </resources>

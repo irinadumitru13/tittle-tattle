@@ -31,8 +31,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
-        String serializedAccessToken = intent.getStringExtra("access_token");
+        String serializedAccessToken = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("access_token", null);
         AccessToken accessToken = new Gson().fromJson(serializedAccessToken, AccessToken.class);
 
         ISUser.getUser().setId(Long.parseLong(accessToken.getUserId()));

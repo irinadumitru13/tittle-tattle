@@ -1,0 +1,3 @@
+My Diploma project - android decentralized ads app, based on Google Nearby API
+
+Using the Nearby Connections API, nodes are discovered, so that information is exchanged between them. A node can subscribe/ unsubscribe from a list of topics, can publish ads regarding those topics, and can receive ads from other nodes regarding their interests. It's a state of the art, in the way that the network needs to have as little congestion as possible, while having an increased delivery rate. The communication is based on two steps - the exchange of history between two nodes and the exchange of the ads, based on the computations made on the history.
